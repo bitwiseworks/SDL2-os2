@@ -1,0 +1,12 @@
+# ignore regenerated files from autoreconf -fvi
+acinclude/libtool.m4
+acinclude/ltoptions.m4
+acinclude/ltsugar.m4
+acinclude/ltversion.m4
+acinclude/lt~obsolete.m4
+build-scripts/ltmain.sh
+configure
+
+# ignore new files from autoreconf -fvi
+autom4te.cache/
+aclocal.m4
