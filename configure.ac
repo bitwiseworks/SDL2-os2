@@ -4085,6 +4085,38 @@ AS_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             have_timers=yes
         fi
         ;;
+    *-*-os2*)
+        ARCH=os2
+        if test "$build" != "$host"; then # cross-compiling
+            # Default cross-compile location
+            ac_default_prefix=/@unixroot/usr/local/cross-tools/$host
+        else
+            # Look for the location of the tools and install there
+            if test "$BUILD_PREFIX" != ""; then
+                ac_default_prefix=$BUILD_PREFIX
+            fi
+        fi
+        CheckDeclarationAfterStatement
+        CheckDummyVideo
+        CheckDiskAudio
+        CheckDummyAudio
+        CheckDLOPEN
+        CheckClockGettime
+        CheckPTHREAD
+
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+            AC_DEFINE(SDL_TIMER_UNIX, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
+        fi
+
+        if test x$enable_filesystem = xyes; then
+            AC_DEFINE(SDL_FILESYSTEM_UNIX, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/filesystem/unix/*.c"
+            have_filesystem=yes
+        fi
+        ;;
     *)
         AC_MSG_ERROR([
 *** Unsupported host:  Please add to configure.ac
