@@ -368,6 +368,14 @@ static void unifont_cleanup()
 /* Unifont code end */
 #endif
 
+#ifdef __WATCOMC__
+void __SDL_Quit()
+{
+  SDL_Quit();
+}
+#define SDL_Quit __SDL_Quit
+#endif
+
 size_t utf8_length(unsigned char c)
 {
     c = (unsigned char)(0xff & c);

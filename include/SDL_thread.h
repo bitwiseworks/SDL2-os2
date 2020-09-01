@@ -133,7 +133,7 @@ SDL_CreateThreadWithStackSize(int (SDLCALL * fn) (void *),
 #define SDL_CreateThreadWithStackSize(fn, name, stacksize, data) SDL_CreateThreadWithStackSize(fn, name, data, (pfnSDL_CurrentBeginThread)_beginthreadex, (pfnSDL_CurrentEndThread)SDL_endthread)
 #endif
 
-#elif defined(__OS2__)
+#elif defined(__OS2__) && !defined(__KLIBC__)
 /*
  * just like the windows case above:  We compile SDL2
  * into a dll with Watcom's runtime statically linked.

@@ -73,7 +73,6 @@ typedef struct
 
 typedef void (*SDL_BlitFunc) (SDL_BlitInfo *info);
 
-
 typedef struct
 {
     Uint32 src_format;

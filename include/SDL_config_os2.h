@@ -176,5 +176,7 @@
 /* #undef HAVE_SQRTF */
 #define HAVE_TAN 1
 /* #undef HAVE_TANF */
+//#define HAVE_ICONV 1
+#define HAVE_ICONV_H 1
 
 #endif /* SDL_config_os2_h_ */

@@ -20,7 +20,7 @@
 */
 #include "../../SDL_internal.h"
 
-#if defined(SDL_TIMER_DUMMY) || defined(SDL_TIMERS_DISABLED)
+#if defined(SDL_TIMER_DUMMY) || defined(SDL_TIMERS_DISABLED) || defined(SDL_TIMER_OS2)
 
 #include "SDL_timer.h"
 
