@@ -21,7 +21,7 @@
 #ifndef _SDL_os2output_
 #define _SDL_os2output_
 
-#include ".\core\os2\SDL_os2.h"
+#include "../../core/os2/SDL_os2.h"
 
 typedef struct _VODATA *PVODATA;
 
