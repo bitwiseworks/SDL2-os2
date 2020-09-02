@@ -24,7 +24,7 @@
 #define _SDL_os2video_h
 
 #include "../SDL_sysvideo.h"
-#include ".\core\os2\SDL_os2.h"
+#include "../../core/os2/SDL_os2.h"
 
 #define INCL_DOS
 #define INCL_DOSERRORS
