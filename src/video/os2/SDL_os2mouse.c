@@ -186,7 +186,6 @@ void OS2_InitMouse(_THIS, ULONG hab)
   if ( hptrCursor == NULLHANDLE )
     hptrCursor = WinQuerySysPointer( HWND_DESKTOP, SPTR_ARROW, TRUE );
 
-  SDL_SetDoubleClickTime( WinQuerySysValue( HWND_DESKTOP, SV_DBLCLKTIME ) );
 }
 
 void OS2_QuitMouse(_THIS)
