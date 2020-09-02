@@ -454,7 +454,7 @@ static int OS2_Init(SDL_AudioDriverImpl * impl)
   impl->OpenDevice    = OS2_OpenDevice;
   impl->PlayDevice    = OS2_PlayDevice;
   impl->WaitDevice    = OS2_WaitDevice;
-  impl->WaitDone      = OS2_WaitDone;
+//gone in 2.0.12   impl->WaitDone      = OS2_WaitDone;
   impl->GetDeviceBuf  = OS2_GetDeviceBuf;
   impl->CloseDevice   = OS2_CloseDevice;
 
