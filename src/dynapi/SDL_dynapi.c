@@ -24,7 +24,7 @@
 
 #if SDL_DYNAMIC_API
 
-#if defined(__OS2__)
+#if defined(__OS2__) && !defined(__LIBCN__)
 #define INCL_DOS
 #define INCL_DOSERRORS
 #include <os2.h>
@@ -230,7 +230,7 @@ static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
     return retval;
 }
 
-#elif defined(unix) || defined(__unix__) || defined(__APPLE__) || defined(__HAIKU__) || defined(__QNX__)
+#elif defined(unix) || defined(__unix__) || defined(__APPLE__) || defined(__HAIKU__) || defined(__QNX__) || defined(__LIBCN__)
 #include <dlfcn.h>
 static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
 {
@@ -238,6 +238,13 @@ static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
     void *retval = NULL;
     if (lib != NULL) {
         retval = dlsym(lib, sym);
+#ifdef __LIBCN__ // also search for _sym
+        if (retval == NULL) {
+            char symbol[256] = {0};
+            snprintf(symbol, sizeof(symbol), "_%s", sym);
+            retval = dlsym(lib, symbol);
+        }
+#endif
         if (retval == NULL) {
             dlclose(lib);
         }
