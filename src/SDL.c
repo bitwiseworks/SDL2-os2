@@ -315,7 +315,7 @@ SDL_QuitSubSystem(Uint32 flags)
 #if SDL_THREAD_OS2
     SDL_OS2TLSFree(); /* thread/os2/SDL_systls.c */
 #endif
-#ifdef __OS2__
+#if defined(__OS2__) && defined(__WATCOMC__)
     SDL_OS2Quit();
 #endif
 
