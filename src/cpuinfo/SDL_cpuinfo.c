@@ -28,6 +28,8 @@
 #include "../core/windows/SDL_windows.h"
 #endif
 #if defined(__OS2__)
+// even configure finds sysctlbyname, don't use it
+#undef HAVE_SYSCTLBYNAME
 #define INCL_DOS
 #include <os2.h>
 #ifndef QSV_NUMPROCESSORS
