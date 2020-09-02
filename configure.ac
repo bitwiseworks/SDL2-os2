@@ -4246,21 +4246,21 @@ done
 GEN_OBJECTS=`echo "$GEN_SOURCES" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 
 VERSION_OBJECTS=`echo $VERSION_SOURCES`
-VERSION_DEPENDS=`echo $VERSION_SOURCES`
+VERSION_DEPENDS=`echo $VERSION_SOURCES | tr ' ' '\n'`
 VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
 VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.rc,\\\\
 \\\\$(objects)/\\2.o: \\1/\\2.rc \\$(objects)/.created\\\\
 \n	\\$(WINDRES) \\$< \\$@,g"`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
-SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
+SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES | tr ' ' '\n'`
 SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.c,\\\\
 \\\\$(objects)/\\2.lo: \\1/\\2.c \\$(objects)/.created\\\\
 \n	\\$(RUN_CMD_CC)\\$(LIBTOOL) --tag=CC --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 
 SDLTEST_OBJECTS=`echo $SDLTEST_SOURCES`
-SDLTEST_DEPENDS=`echo $SDLTEST_SOURCES`
+SDLTEST_DEPENDS=`echo $SDLTEST_SOURCES | tr ' ' '\n'`
 SDLTEST_OBJECTS=`echo "$SDLTEST_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.lo,g'`
 SDLTEST_DEPENDS=`echo "$SDLTEST_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.c,\\\\
 \\\\$(objects)/\\2.lo: \\1/\\2.c \\$(objects)/.created\\\\
