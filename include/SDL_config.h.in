@@ -273,6 +273,7 @@
 #undef SDL_AUDIO_DRIVER_SUNAUDIO
 #undef SDL_AUDIO_DRIVER_WASAPI
 #undef SDL_AUDIO_DRIVER_WINMM
+#undef SDL_AUDIO_DRIVER_OS2
 
 /* Enable various input drivers */
 #undef SDL_INPUT_LINUXEV
@@ -306,18 +307,21 @@
 #undef SDL_LOADSO_DUMMY
 #undef SDL_LOADSO_LDG
 #undef SDL_LOADSO_WINDOWS
+#undef SDL_LOADSO_OS2
 
 /* Enable various threading systems */
 #undef SDL_THREAD_PTHREAD
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX
 #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP
 #undef SDL_THREAD_WINDOWS
+#undef SDL_THREAD_OS2
 
 /* Enable various timer systems */
 #undef SDL_TIMER_HAIKU
 #undef SDL_TIMER_DUMMY
 #undef SDL_TIMER_UNIX
 #undef SDL_TIMER_WINDOWS
+#undef SDL_TIMER_OS2
 
 /* Enable various video drivers */
 #undef SDL_VIDEO_DRIVER_HAIKU
@@ -363,6 +367,7 @@
 #undef SDL_VIDEO_DRIVER_VIVANTE
 #undef SDL_VIDEO_DRIVER_VIVANTE_VDK
 #undef SDL_VIDEO_DRIVER_QNX
+#undef SDL_VIDEO_DRIVER_OS2
 
 #undef SDL_VIDEO_RENDER_D3D
 #undef SDL_VIDEO_RENDER_D3D11
@@ -398,6 +403,7 @@
 #undef SDL_POWER_ANDROID
 #undef SDL_POWER_EMSCRIPTEN
 #undef SDL_POWER_HARDWIRED
+#undef SDL_POWER_OS2
 
 /* Enable system filesystem support */
 #undef SDL_FILESYSTEM_HAIKU
@@ -408,6 +414,7 @@
 #undef SDL_FILESYSTEM_NACL
 #undef SDL_FILESYSTEM_ANDROID
 #undef SDL_FILESYSTEM_EMSCRIPTEN
+#undef SDL_FILESYSTEM_OS2
 
 /* Enable assembly routines */
 #undef SDL_ASSEMBLY_ROUTINES
