@@ -91,12 +91,16 @@ SDL_GetPrefPath(const char *org, const char *app)
       return NULL;
   }
 
-  lPosApp = SDL_snprintf( &acBuf, sizeof(acBuf) - 1, "%s\\%s", pszPath, pszOrg );
+  lPosApp = SDL_snprintf( acBuf, sizeof(acBuf) - 1, "%s\\%s", pszPath, pszOrg );
   SDL_free( pszOrg );
   if ( lPosApp == -1 )
     return NULL;
 
-  mkdir( &acBuf );
+#ifdef __WATCOMC__
+  mkdir(&acBuf);
+#else
+  mkdir(acBuf, 0700);
+#endif
 
   pszApp = OS2_UTF8ToSys( app );
   if ( pszApp == NULL )
@@ -111,10 +115,14 @@ SDL_GetPrefPath(const char *org, const char *app)
   if ( lPosOrg == -1 )
     return NULL;
   
-  mkdir( &acBuf );
+#ifdef __WATCOMC__
+  mkdir(&acBuf);
+#else
+  mkdir(acBuf, 0700);
+#endif
   *((PUSHORT)&acBuf[lPosApp + lPosOrg]) = (USHORT)'\0\\';
 
-  return OS2_SysToUTF8( &acBuf );
+  return OS2_SysToUTF8(acBuf);
 }
 
 #endif /* SDL_FILESYSTEM_OS2 */
