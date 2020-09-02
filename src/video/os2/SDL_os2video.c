@@ -329,10 +329,12 @@ static VOID _wmChar(PWINDATA pWinData, MPARAM mp1, MPARAM mp2)
 
   if ( (ulFlags & KC_CHAR) != 0 )
   {
-    CHAR     acUTF8[4];
-    LONG     lRC = StrUTF8( 1, &acUTF8, sizeof(acUTF8), (PSZ)&ulCharCode, 1 );
+//    CHAR     acUTF8[4];
+//    LONG     lRC = StrUTF8( 1, &acUTF8, sizeof(acUTF8), (PSZ)&ulCharCode, 1 );
+    PSZ      acUTF8;
+    acUTF8 = OS2_SysToUTF8(ulCharCode);
 
-    SDL_SendKeyboardText( lRC > 0 ? &acUTF8 : (PSZ)&ulCharCode );
+    SDL_SendKeyboardText( strlen(acUTF8) > 0 ? &acUTF8 : (PSZ)&ulCharCode );
   }
 }
 
@@ -424,11 +426,11 @@ static MRESULT _wmDrop(PWINDATA pWinData, PDRAGINFO pDragInfo)
                        sizeof(acFName), &acFName );
       pcFName = strchr( &acFName, '\0' );
       DrgQueryStrName( pDragItem->hstrSourceName,
-                       sizeof(acFName) - (pcFName - &acFName), pcFName );
+                       sizeof(acFName) - (pcFName - acFName), pcFName );
 
       // Send to SDL full file name converted to UTF-8.
       pcFName = OS2_SysToUTF8( &acFName );
-      SDL_SendDropFile( pcFName );
+      SDL_SendDropFile( pWinData->window, pcFName );
       SDL_free( pcFName );
 
       // Notify a source that a drag operation is complete. 
@@ -1714,8 +1716,8 @@ static SDL_VideoDevice *OS2_CreateDevice(int devindex)
   device->GetDisplayModes = OS2_GetDisplayModes;
   device->SetDisplayMode = OS2_SetDisplayMode;
   device->PumpEvents = OS2_PumpEvents;
-  device->CreateWindow = OS2_CreateWindow;
-  device->CreateWindowFrom = OS2_CreateWindowFrom;
+  device->CreateSDLWindow = OS2_CreateWindow;
+  device->CreateSDLWindowFrom = OS2_CreateWindowFrom;
   device->DestroyWindow = OS2_DestroyWindow;
   device->SetWindowTitle = OS2_SetWindowTitle;
   device->SetWindowIcon = OS2_SetWindowIcon;
