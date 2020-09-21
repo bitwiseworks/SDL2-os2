@@ -31,6 +31,10 @@
 #include "../SDL_audio_c.h"
 #include "SDL_os2audio.h"
 
+/* no capture devices so far, so need to init them  
+   as soon as we have it, enable set OS2_HasCapture to 1 or remove the if */
+#define OS2_HasCapture 0
+
 /*
 void lockIncr(volatile int *piVal);
 #pragma aux lockIncr = \
@@ -170,8 +174,10 @@ static void OS2_DetectDevices(void)
 
     ulHandle++;
     SDL_AddAudioDevice( 0, &stLogDevice.szProductInfo, (void *)(ulHandle) );
+#if OS2_HasCapture
     ulHandle++;
     SDL_AddAudioDevice( 1, &stLogDevice.szProductInfo, (void *)(ulHandle) );
+#endif
   }
 }
 
@@ -458,8 +464,9 @@ static int OS2_Init(SDL_AudioDriverImpl * impl)
   impl->GetDeviceBuf  = OS2_GetDeviceBuf;
   impl->CloseDevice   = OS2_CloseDevice;
 
-// [Digi]: SDL 2.0 does not support recording yet (2016-02-24).
-//  impl->HasCaptureSupport = SDL_TRUE;
+#if OS2_HasCapture
+  impl->HasCaptureSupport = SDL_TRUE;
+#endif
 
   return 1;   /* this audio target is available. */
 }
