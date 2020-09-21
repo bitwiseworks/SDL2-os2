@@ -108,12 +108,12 @@ Uint32 SDLCALL _timerTestCallback(Uint32 interval, void *param)
 {
    _timerCallbackCalled = 1;
 
-+// [Digi, 2016]:
-+// SDL_AddTimer() -> SDL_TimerInit() -> SDL_CreateThread() - timer thread that
-+// have called this function was created with _beginthread() of SDL2.DLL's RTL, not
-+// not our RTL! So we can't use any LIBC functions here! Hm... what about other
-+// OSes/compilers ?!
-+#if !defined(__WATCOMC__)
+// [Digi, 2016]:
+// SDL_AddTimer() -> SDL_TimerInit() -> SDL_CreateThread() - timer thread that
+// have called this function was created with _beginthread() of SDL2.DLL's RTL, not
+// not our RTL! So we can't use any LIBC functions here! Hm... what about other
+// OSes/compilers ?!
+#if !defined(__WATCOMC__)
    if (_paramCheck != 0) {
        SDLTest_AssertCheck(param != NULL, "Check param pointer, expected: non-NULL, got: %s", (param != NULL) ? "non-NULL" : "NULL");
        if (param != NULL) {
