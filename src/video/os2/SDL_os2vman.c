@@ -104,7 +104,7 @@ static BOOL _vmanInit()
   ulRC = DosLoadModule( &acBuf, sizeof(acBuf), "VMAN", &hmodVMan );
   if ( ulRC != NO_ERROR )
   {
-    debug( "Could not load VMAN.DLL, rc = %u : %s", ulRC, &acBuf );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Could not load VMAN.DLL, rc = %u : %s", ulRC, &acBuf );
     hmodVMan = NULLHANDLE;
     return FALSE;
   }
@@ -113,7 +113,7 @@ static BOOL _vmanInit()
   ulRC = DosQueryProcAddr( hmodVMan, 0L, "VMIEntry", (PFN *)&pfnVMIEntry );
   if ( ulRC != NO_ERROR )
   {
-    debug( "Could not query address of pfnVMIEntry func. of VMAN.DLL, "
+    debug(SDL_LOG_CATEGORY_VIDEO, "Could not query address of pfnVMIEntry func. of VMAN.DLL, "
            "rc = %u", ulRC );
     DosFreeModule( hmodVMan );
     hmodVMan = NULLHANDLE;
@@ -125,7 +125,7 @@ static BOOL _vmanInit()
   ulRC = pfnVMIEntry( 0, VMI_CMD_INITPROC, NULL, &stInitProcOut );
   if ( ulRC != RC_SUCCESS )
   {
-    debug( "Could not initialize VMAN for this process" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Could not initialize VMAN for this process" );
     pfnVMIEntry = NULL;
     DosFreeModule( hmodVMan );
     hmodVMan = NULLHANDLE;
@@ -137,7 +137,7 @@ static BOOL _vmanInit()
   // We use exit list for VMI_CMD_TERMPROC.
   if ( DosExitList( EXLST_ADD | 0x00001000, (PFNEXITLIST)ExitVMan )
        != NO_ERROR )
-    debug( "DosExitList() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DosExitList() failed" );
 
   return TRUE;
 }
@@ -187,7 +187,7 @@ static BOOL voQueryInfo(PVIDEOOUTPUTINFO pInfo)
   ulRC = pfnVMIEntry( 0, VMI_CMD_QUERYCURRENTMODE, NULL, &sCurModeInfo );
   if ( ulRC != RC_SUCCESS )
   {
-    debug( "Could not query desktop video mode." );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Could not query desktop video mode." );
     return FALSE;
   }
 
@@ -306,7 +306,7 @@ static PVOID voVideoBufAlloc(PVODATA pVOData, ULONG ulWidth, ULONG ulHeight,
                       PAG_COMMIT | PAG_EXECUTE | PAG_READ | PAG_WRITE );
   if ( ulRC != NO_ERROR )
   {
-    debug( "DosAllocMem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DosAllocMem(), rc = %u", ulRC );
     return NULL;
   }
 
@@ -327,7 +327,7 @@ static VOID voVideoBufFree(PVODATA pVOData)
 
   ulRC = DosFreeMem( pVOData->pBuffer );
   if ( ulRC != NO_ERROR )
-    debug( "DosFreeMem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DosFreeMem(), rc = %u", ulRC );
   else
     pVOData->pBuffer = NULL;
 }
@@ -390,7 +390,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
   prectlDst = _getRectlArray( pVOData, cSDLRects );
   if ( prectlDst == NULL )
   {
-    debug( "Not enough memory" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Not enough memory" );
     return FALSE;
   }
   prectlScan = prectlDst;
@@ -428,7 +428,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
   prectlDst = _getRectlArray( pVOData, rgnCtl.crcReturned );
   if ( prectlDst == NULL )
   {
-    debug( "Not enough memory" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Not enough memory" );
     GpiDestroyRegion( hps, hrgnUpdate );
     WinReleasePS( hps );
     return FALSE;
@@ -447,7 +447,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
   pbrDst = _getBltRectArray( pVOData, cSDLRects );
   if ( pbrDst == NULL )
   {
-    debug( "Not enough memory" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Not enough memory" );
     return FALSE;
   }
 
@@ -472,7 +472,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
   sHWReqIn.arectlScreen = &pVOData->rectlWin;
   if ( pfnVMIEntry( 0, VMI_CMD_REQUESTHW, &sHWReqIn, NULL ) != RC_SUCCESS )
   {
-    debug( "pfnVMIEntry(,VMI_CMD_REQUESTHW,,) failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "pfnVMIEntry(,VMI_CMD_REQUESTHW,,) failed" );
     sHWReqIn.cScrChangeRects = 0; // for fail signal only.
   }
   else
@@ -498,14 +498,14 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
     // Screen update.
     if ( pfnVMIEntry( 0, VMI_CMD_BITBLT, &sBitbltInfo, NULL ) != RC_SUCCESS )
     {
-      debug( "pfnVMIEntry(,VMI_CMD_BITBLT,,) failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "pfnVMIEntry(,VMI_CMD_BITBLT,,) failed" );
       sHWReqIn.cScrChangeRects = 0; // for fail signal only.
     }
 
     // Release HW.
     sHWReqIn.ulFlags = 0;
     if ( pfnVMIEntry( 0, VMI_CMD_REQUESTHW, &sHWReqIn, NULL ) != RC_SUCCESS )
-      debug( "pfnVMIEntry(,VMI_CMD_REQUESTHW,,) failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "pfnVMIEntry(,VMI_CMD_REQUESTHW,,) failed" );
   }
 
   return sHWReqIn.cScrChangeRects != 0;

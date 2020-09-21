@@ -168,7 +168,7 @@ static SDL_DisplayMode *_getDisplayModeForSDLWindow(SDL_Window *window)
 
   if ( pSDLDisplay == NULL )
   {
-    debug( "No display for the window" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "No display for the window" );
     return FALSE;
   }
 
@@ -846,7 +846,7 @@ static int OS2_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
   SWP                  swp;
   POINTL               pointl;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   if ( pSDLDisplayMode == NULL )
     return -1;
 
@@ -959,7 +959,7 @@ static void OS2_DestroyWindow(_THIS, SDL_Window * window)
   PSDL_VideoData       pVData = (PSDL_VideoData)_this->driverdata;
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   if ( pWinData == NULL )
     return;
@@ -1011,7 +1011,7 @@ static void OS2_SetWindowIcon(_THIS, SDL_Window *window, SDL_Surface *icon)
   // Set new window icon.
   pWinData->hptrIcon = hptr;
   if ( !WinSendMsg( pWinData->hwndFrame, WM_SETICON, MPFROMLONG( hptr ), 0 ) )
-    debug( "Cannot set icon for the window" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Cannot set icon for the window" );
 }
 
 static void OS2_SetWindowPosition(_THIS, SDL_Window *window)
@@ -1021,7 +1021,7 @@ static void OS2_SetWindowPosition(_THIS, SDL_Window *window)
   ULONG                ulFlags;
   SDL_DisplayMode      *pSDLDisplayMode = _getDisplayModeForSDLWindow( window );
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   if ( pSDLDisplayMode == NULL )
     return;
 
@@ -1049,7 +1049,7 @@ static void OS2_SetWindowPosition(_THIS, SDL_Window *window)
 
 static void OS2_SetWindowSize(_THIS, SDL_Window *window)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   OS2_SetWindowPosition( _this, window );
 }
 
@@ -1057,7 +1057,7 @@ static void OS2_ShowWindow(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   WinShowWindow( pWinData->hwndFrame, TRUE );
 }
 
@@ -1065,13 +1065,13 @@ static void OS2_HideWindow(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   WinShowWindow( pWinData->hwndFrame, FALSE );
 }
 
 static void OS2_RaiseWindow(_THIS, SDL_Window *window)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   OS2_SetWindowPosition( _this, window );
 }
 
@@ -1079,7 +1079,7 @@ static void OS2_MaximizeWindow(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   WinSetWindowPos( pWinData->hwndFrame, HWND_TOP, 0, 0, 0, 0, SWP_MAXIMIZE );
 }
 
@@ -1087,7 +1087,7 @@ static void OS2_MinimizeWindow(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   WinSetWindowPos( pWinData->hwndFrame, HWND_TOP, 0, 0, 0, 0,
                    SWP_MINIMIZE | SWP_DEACTIVATE  );
 }
@@ -1096,7 +1096,7 @@ static void OS2_RestoreWindow(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   WinSetWindowPos( pWinData->hwndFrame, HWND_TOP, 0, 0, 0, 0,
                    SWP_RESTORE );
 }
@@ -1108,7 +1108,7 @@ static void OS2_SetWindowBordered(_THIS, SDL_Window * window,
   ULONG      ulStyle = WinQueryWindowULong( pWinData->hwndFrame, QWL_STYLE );
   RECTL      rectl;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   // New frame sytle.
   if ( bordered )
@@ -1143,7 +1143,7 @@ static void OS2_SetWindowFullscreen(_THIS, SDL_Window *window,
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
   SDL_DisplayMode      *pSDLDisplayMode = &display->current_mode;
 
-  debug( "Enter, fullscreen: %u", fullscreen );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter, fullscreen: %u", fullscreen );
 
   if ( pSDLDisplayMode == NULL )
     return;
@@ -1174,12 +1174,12 @@ static void OS2_SetWindowFullscreen(_THIS, SDL_Window *window,
   }
 
   if ( !WinCalcFrameRect( pWinData->hwndFrame, &rectl, FALSE ) )
-    debug( "WinCalcFrameRect() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "WinCalcFrameRect() failed" );
   else if ( !WinSetWindowPos( pWinData->hwndFrame, HWND_TOP,
                         rectl.xLeft, rectl.yBottom,
                         rectl.xRight - rectl.xLeft, rectl.yTop - rectl.yBottom,
                         ulFlags ) )
-    debug( "WinSetWindowPos() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "WinSetWindowPos() failed" );
 }
 
 static SDL_bool OS2_GetWindowWMInfo(_THIS, SDL_Window * window,
@@ -1206,7 +1206,7 @@ static void OS2_OnWindowEnter(_THIS, SDL_Window * window)
 
 static int OS2_SetWindowHitTest(SDL_Window *window, SDL_bool enabled)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   return 0;
 }
 
@@ -1214,7 +1214,7 @@ static void OS2_SetWindowGrab(_THIS, SDL_Window *window, SDL_bool grabbed)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter, %u", grabbed );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter, %u", grabbed );
   _mouseCheck( pWinData );
 }
 
@@ -1256,7 +1256,7 @@ static SDL_WindowShaper* OS2_CreateShaper(SDL_Window * window)
 {
   SDL_WindowShaper*    pSDLShaper = SDL_malloc( sizeof(SDL_WindowShaper) );
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   pSDLShaper->window = window;
   pSDLShaper->mode.mode = ShapeModeDefault;
   pSDLShaper->mode.parameters.binarizationCutoff = 1;
@@ -1283,7 +1283,7 @@ static int OS2_SetWindowShape(SDL_WindowShaper *shaper, SDL_Surface *shape,
   SHAPERECTS           stShapeRects = { 0 };
   HPS                  hps;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   if ( ( shaper == NULL ) || ( shape == NULL ) ||
        ( ( shape->format->Amask == 0 ) &&
          ( shape_mode->mode != ShapeModeColorKey ) ) ||
@@ -1319,7 +1319,7 @@ static int OS2_SetWindowShape(SDL_WindowShaper *shaper, SDL_Surface *shape,
 
 static int OS2_ResizeWindowShape(SDL_Window *window)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   if ( window == NULL )
     return -1;
@@ -1347,7 +1347,7 @@ static void OS2_DestroyWindowFramebuffer(_THIS, SDL_Window *window)
 {
   PWINDATA             pWinData = (PWINDATA)window->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   if ( ( pWinData != NULL ) && ( pWinData->pVOData != NULL ) )
     pWinData->pOutput->VideoBufFree( pWinData->pVOData );
 }
@@ -1362,11 +1362,11 @@ static int OS2_CreateWindowFramebuffer(_THIS, SDL_Window *window,
   PMODEDATA            pModeData;
   ULONG                ulWidth, ulHeight;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   if ( pSDLDisplay == NULL )
   {
-    debug( "No display for the window" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "No display for the window" );
     return -1;
   }
 
@@ -1376,7 +1376,7 @@ static int OS2_CreateWindowFramebuffer(_THIS, SDL_Window *window,
     return SDL_SetError( "No mode data for the display" );
 
   SDL_GetWindowSize( window, (int *)&ulWidth, (int *)&ulHeight );
-  debug( "Window size: %u x %u", ulWidth, ulHeight );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Window size: %u x %u", ulWidth, ulHeight );
 
   *pixels = pWinData->pOutput->VideoBufAlloc(
                       pWinData->pVOData, ulWidth, ulHeight, pModeData->ulDepth,
@@ -1385,7 +1385,7 @@ static int OS2_CreateWindowFramebuffer(_THIS, SDL_Window *window,
     return -1;
 
   *format = pSDLDisplayMode->format;
-  debug( "Pitch: %u, frame buffer: 0x%X.", *pitch, *pixels );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Pitch: %u, frame buffer: 0x%X.", *pitch, *pixels );
   WinSendMsg( pWinData->hwnd, WM_VRNENABLED, 0, 0 );
 
   return 0;
@@ -1413,7 +1413,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
   ULONG                ulRC;
   BOOL                 fSuccess;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   if ( pszText == NULL )
     return -1;
   cbText = SDL_strlen( pszText );
@@ -1423,7 +1423,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
                             OBJ_GIVEABLE | OBJ_GETTABLE | OBJ_TILE );
   if ( ulRC != NO_ERROR )
   {
-    debug( "DosAllocSharedMem() failed, rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DosAllocSharedMem() failed, rc = %u", ulRC );
     SDL_free( pszText );
     return -1;
   }
@@ -1433,7 +1433,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
 
   if ( !WinOpenClipbrd( pVData->hab ) )
   {
-    debug( "WinOpenClipbrd() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed" );
     fSuccess = FALSE;
   }
   else
@@ -1443,7 +1443,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
     fSuccess = WinSetClipbrdData( pVData->hab, (ULONG)pszClipboard, CF_TEXT,
                                   CFI_POINTER );
     if ( !fSuccess )
-      debug( "WinOpenClipbrd() failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed" );
 
     WinCloseClipbrd( pVData->hab );
   }
@@ -1463,7 +1463,7 @@ static char *OS2_GetClipboardText(_THIS)
   PSZ                  pszClipboard = NULL;
 
   if ( !WinOpenClipbrd( pVData->hab ) )
-    debug( "WinOpenClipbrd() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed" );
   else
   {
     pszClipboard = (PSZ)WinQueryClipbrdData( pVData->hab, CF_TEXT );
@@ -1482,7 +1482,7 @@ static SDL_bool OS2_HasClipboardText(_THIS)
 
   if ( !WinOpenClipbrd( pVData->hab ) )
   {
-    debug( "WinOpenClipbrd() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed" );
     return SDL_FALSE;
   }
 
@@ -1648,7 +1648,7 @@ static void OS2_VideoQuit(_THIS)
 static int OS2_GetDisplayBounds(_THIS, SDL_VideoDisplay *display,
                                 SDL_Rect *rect)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   rect->x = 0;
   rect->y = 0;
@@ -1663,7 +1663,7 @@ static int OS2_GetDisplayDPI(_THIS, SDL_VideoDisplay *display, float *ddpi,
 {
   PDISPLAYDATA         pDisplayData = (PDISPLAYDATA)display->driverdata;
 
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
 
   if ( pDisplayData == NULL )
     return -1;
@@ -1682,14 +1682,14 @@ static int OS2_GetDisplayDPI(_THIS, SDL_VideoDisplay *display, float *ddpi,
 
 static void OS2_GetDisplayModes(_THIS, SDL_VideoDisplay *display)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   SDL_AddDisplayMode( display, &display->current_mode );
 }
 
 static int OS2_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
                               SDL_DisplayMode *mode)
 {
-  debug( "Enter" );
+  debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
   return -1;
 }
 

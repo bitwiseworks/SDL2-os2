@@ -71,7 +71,7 @@ static int _MCIError(PSZ pszFunc, ULONG ulResult)
 
 static void _mixIOError(PSZ pszFunction, ULONG ulRC)
 {
-  debug( "%s() - failed, rc = 0x%X (%s)",
+  debug(SDL_LOG_CATEGORY_AUDIO, "%s() - failed, rc = 0x%X (%s)",
          pszFunction, ulRC,
          ulRC == MCIERR_INVALID_MODE ? "Mixer mode does not match request"
          : ulRC == MCIERR_INVALID_BUFFER ? "Caller sent an invalid buffer"
@@ -86,14 +86,14 @@ LONG APIENTRY cbAudioWriteEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
 
   if ( ulFlags != MIX_WRITE_COMPLETE )
   {
-    debug( "flags = 0x%X", ulFlags );
+    debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%X", ulFlags );
     return 0;
   }
 
 //  lockDecr( (int *)&pAData->ulQueuedBuf );
   ulRC = DosPostEventSem( pAData->hevBuf );
   if ( ( ulRC != NO_ERROR ) && ( ulRC != ERROR_ALREADY_POSTED ) )
-    debug( "DosPostEventSem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %u", ulRC );
 
   return 1; // It seems, return value is not matter.
 }
@@ -106,7 +106,7 @@ LONG APIENTRY cbAudioReadEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
 
   if ( ulFlags != MIX_READ_COMPLETE )
   {
-    debug( "flags = 0x%X", ulFlags );
+    debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%X", ulFlags );
     return 0;
   }
 
@@ -115,7 +115,7 @@ LONG APIENTRY cbAudioReadEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
 
   ulRC = DosPostEventSem( pAData->hevBuf );
   if ( ( ulRC != NO_ERROR ) && ( ulRC != ERROR_ALREADY_POSTED ) )
-    debug( "DosPostEventSem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %u", ulRC );
 
   return 1;
 }
@@ -139,7 +139,7 @@ static void OS2_DetectDevices(void)
                          &stMCISysInfo, 0 );
   if ( ulRC != NO_ERROR )
   {
-    debug( "MCI_SYSINFO, MCI_SYSINFO_QUANTITY - failed, rc = 0x%X", ulRC );
+    debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_QUANTITY - failed, rc = 0x%X", ulRC );
     return;
   }
 
@@ -156,7 +156,7 @@ static void OS2_DetectDevices(void)
                            &stSysInfoParams, 0 );
     if ( ulRC != NO_ERROR )
     {
-      debug( "MCI_SYSINFO, MCI_SYSINFO_INSTALLNAME - failed, rc = 0x%X", ulRC );
+      debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_INSTALLNAME - failed, rc = 0x%X", ulRC );
       continue;
     }
 
@@ -168,7 +168,7 @@ static void OS2_DetectDevices(void)
                            &stSysInfoParams, 0 );
     if ( ulRC != NO_ERROR )
     {
-      debug( "MCI_SYSINFO, MCI_SYSINFO_ITEM - failed, rc = 0x%X", ulRC );
+      debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_ITEM - failed, rc = 0x%X", ulRC );
       continue;
     }
 
@@ -189,7 +189,7 @@ static void OS2_WaitDevice(_THIS)
   /* Wait for an audio chunk to finish */
   ulRC = DosWaitEventSem( pAData->hevBuf, 5000 );
   if ( ulRC != NO_ERROR )
-    debug( "DosWaitEventSem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_AUDIO, "DosWaitEventSem(), rc = %u", ulRC );
 }
 
 static Uint8 *OS2_GetDeviceBuf(_THIS)
@@ -244,7 +244,7 @@ static void OS2_CloseDevice(_THIS)
                              MCI_WAIT | MCI_MIXSETUP_DEINIT,
                              &pAData->stMCIMixSetup, 0 );
       if ( ulRC != MCIERR_SUCCESS )
-        debug( "MCI_MIXSETUP, MCI_MIXSETUP_DEINIT - failed" );
+        debug(SDL_LOG_CATEGORY_AUDIO, "MCI_MIXSETUP, MCI_MIXSETUP_DEINIT - failed" );
     }
 
     if ( pAData->cMixBuffers != 0 )
@@ -259,13 +259,13 @@ static void OS2_CloseDevice(_THIS)
       ulRC = mciSendCommand( pAData->usDeviceId, MCI_BUFFER,
                              MCI_WAIT | MCI_DEALLOCATE_MEMORY, &stMCIBuffer, 0 );
       if ( ulRC != MCIERR_SUCCESS )
-        debug( "MCI_BUFFER, MCI_DEALLOCATE_MEMORY - failed" );
+        debug(SDL_LOG_CATEGORY_AUDIO, "MCI_BUFFER, MCI_DEALLOCATE_MEMORY - failed" );
     }
 
     ulRC = mciSendCommand( pAData->usDeviceId, MCI_CLOSE, MCI_WAIT,
                            &sMCIGenericParms, 0 );
     if ( ulRC != MCIERR_SUCCESS )
-      debug( "MCI_CLOSE - failed" );
+      debug(SDL_LOG_CATEGORY_AUDIO, "MCI_CLOSE - failed" );
   }
 
   if ( pAData->hevBuf != NULLHANDLE )
@@ -294,7 +294,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
 
   if ( SDLAudioFmt == 0 )
   {
-    debug( "Unsupported audio format, AUDIO_S16 used" );
+    debug(SDL_LOG_CATEGORY_AUDIO, "Unsupported audio format, AUDIO_S16 used" );
     SDLAudioFmt = AUDIO_S16;
     this->spec.freq = AUDIO_S16;
   }
@@ -307,7 +307,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
   ulRC = DosCreateEventSem( NULL, &pAData->hevBuf, DCE_AUTORESET, TRUE );
   if ( ulRC != NO_ERROR )
   {
-    debug( "DosCreateEventSem() failed, rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_AUDIO, "DosCreateEventSem() failed, rc = %u", ulRC );
     return -1;
   }
 
@@ -393,7 +393,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
                      MCI_WAIT | MCI_MIXSETUP_INIT, &pAData->stMCIMixSetup, 0 );
   }
   
-  debug( "Setup mixer [BPS: %u, Freq.: %u, Channels: %u]: %s",
+  debug(SDL_LOG_CATEGORY_AUDIO, "Setup mixer [BPS: %u, Freq.: %u, Channels: %u]: %s",
          pAData->stMCIMixSetup.ulBitsPerSample,
          pAData->stMCIMixSetup.ulSamplesPerSec,
          pAData->stMCIMixSetup.ulChannels,

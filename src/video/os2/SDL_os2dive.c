@@ -78,13 +78,13 @@ static BOOL voQueryInfo(PVIDEOOUTPUTINFO pInfo)
 
   if ( DiveQueryCaps( &sDiveCaps, DIVE_BUFFER_SCREEN ) )
   {
-    debug( "DiveQueryCaps() failed." );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DiveQueryCaps() failed." );
     return FALSE;
   }
 
   if ( sDiveCaps.ulDepth < 8 )
   {
-    debug( "Not enough screen colors to run DIVE. "
+    debug(SDL_LOG_CATEGORY_VIDEO, "Not enough screen colors to run DIVE. "
            "Must be at least 256 colors." );
     return FALSE;
   }
@@ -141,7 +141,7 @@ static BOOL voSetVisibleRegion(PVODATA pVOData, HWND hwnd,
     {
       pVOData->fBlitterReady = FALSE;
       DiveSetupBlitter( pVOData->hDive, 0 );
-      debug( "DIVE blitter is tuned off" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DIVE blitter is tuned off" );
     }
     return TRUE;
   }
@@ -217,7 +217,7 @@ static BOOL voSetVisibleRegion(PVODATA pVOData, HWND hwnd,
       {
         pVOData->fBlitterReady = TRUE;
         WinInvalidateRect( hwnd, NULL, TRUE );
-        debug( "DIVE blitter is ready now." );
+        debug(SDL_LOG_CATEGORY_VIDEO, "DIVE blitter is ready now." );
         return TRUE;
       }
 
@@ -252,7 +252,7 @@ static PVOID voVideoBufAlloc(PVODATA pVOData, ULONG ulWidth, ULONG ulHeight,
                       PAG_COMMIT | PAG_EXECUTE | PAG_READ | PAG_WRITE );
   if ( ulRC != NO_ERROR )
   {
-    debug( "DosAllocMem(), rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DosAllocMem(), rc = %lu", ulRC );
     return NULL;
   }
 
@@ -261,7 +261,7 @@ static PVOID voVideoBufAlloc(PVODATA pVOData, ULONG ulWidth, ULONG ulHeight,
                                ulScanLineSize, pVOData->pBuffer );
   if ( ulRC != DIVE_SUCCESS )
   {
-    debug( "DiveAllocImageBuffer(), rc = 0x%X", ulRC );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DiveAllocImageBuffer(), rc = 0x%lX", ulRC );
     DosFreeMem( pVOData->pBuffer );
     pVOData->pBuffer = NULL;
     pVOData->ulDIVEBufNum = 0;
@@ -272,7 +272,7 @@ static PVOID voVideoBufAlloc(PVODATA pVOData, ULONG ulWidth, ULONG ulHeight,
   pVOData->ulWidth = ulWidth;
   pVOData->ulHeight = ulHeight;
 
-  debug( "buffer: 0x%P, DIVE buffer number: %u",
+  debug(SDL_LOG_CATEGORY_VIDEO, "buffer: 0x%p, DIVE buffer number: %lu",
          pVOData->pBuffer, pVOData->ulDIVEBufNum );
 
   return pVOData->pBuffer;
@@ -286,9 +286,9 @@ static VOID voVideoBufFree(PVODATA pVOData)
   {
     ulRC = DiveFreeImageBuffer( pVOData->hDive, pVOData->ulDIVEBufNum );
     if ( ulRC != DIVE_SUCCESS )
-      debug( "DiveFreeImageBuffer(,%u), rc = %u", pVOData->ulDIVEBufNum, ulRC );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DiveFreeImageBuffer(,%lu), rc = %lu", pVOData->ulDIVEBufNum, ulRC );
     else
-      debug( "DIVE buffer %u destroyed", pVOData->ulDIVEBufNum );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DIVE buffer %lu destroyed", pVOData->ulDIVEBufNum );
 
     pVOData->ulDIVEBufNum = 0;
   }
@@ -297,7 +297,7 @@ static VOID voVideoBufFree(PVODATA pVOData)
   {
     ulRC = DosFreeMem( pVOData->pBuffer );
     if ( ulRC != NO_ERROR )
-      debug( "DosFreeMem(), rc = %u", ulRC );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DosFreeMem(), rc = %lu", ulRC );
 
     pVOData->pBuffer = NULL;
   }
@@ -310,7 +310,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
 
   if ( !pVOData->fBlitterReady || ( pVOData->ulDIVEBufNum == 0 ) )
   {
-    debug( "DIVE blitter is not ready" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "DIVE blitter is not ready" );
     return FALSE;
   }
 
@@ -321,7 +321,7 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
     pbLineMask = SDL_stack_alloc( BYTE, pVOData->ulHeight );
     if ( pbLineMask == NULL )
     {
-      debug( "Not enough stack size" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "Not enough stack size" );
       return FALSE;
     }
     memset( pbLineMask, 0, pVOData->ulHeight );
@@ -334,14 +334,14 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
     SDL_stack_free( pbLineMask );
 
     if ( ulRC != DIVE_SUCCESS )
-      debug( "DiveBlitImageLines(), rc = 0x%X", ulRC );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DiveBlitImageLines(), rc = 0x%lX", ulRC );
   }
   else
   {
     ulRC = DiveBlitImage( pVOData->hDive, pVOData->ulDIVEBufNum,
                           DIVE_BUFFER_SCREEN );
     if ( ulRC != DIVE_SUCCESS )
-      debug( "DiveBlitImage(), rc = 0x%X", ulRC );
+      debug(SDL_LOG_CATEGORY_VIDEO, "DiveBlitImage(), rc = 0x%lX", ulRC );
   }
 
   return ulRC == DIVE_SUCCESS;

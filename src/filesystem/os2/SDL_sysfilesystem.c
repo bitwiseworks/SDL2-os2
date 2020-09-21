@@ -48,7 +48,7 @@ SDL_GetBasePath(void)
   
   if ( ulRC != NO_ERROR )
   {
-    debug( "DosGetInfoBlocks() failed, rc = %u", ulRC );
+    debug(SDL_LOG_CATEGORY_SYSTEM, "DosGetInfoBlocks() failed, rc = %ul", ulRC );
     return NULL;
   }
 

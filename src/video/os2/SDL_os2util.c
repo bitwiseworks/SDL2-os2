@@ -38,7 +38,7 @@ HPOINTER utilCreatePointer(SDL_Surface *surface, ULONG ulHotX, ULONG ulHotY)
 
   if ( surface->format->format != SDL_PIXELFORMAT_ARGB8888 )
   {
-    debug( "Image format should be SDL_PIXELFORMAT_ARGB8888" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "Image format should be SDL_PIXELFORMAT_ARGB8888" );
     return NULLHANDLE;
   }
 
@@ -49,9 +49,9 @@ HPOINTER utilCreatePointer(SDL_Surface *surface, ULONG ulHotX, ULONG ulHotY)
     return NULLHANDLE;
   }
 
-  // pulDst - last line of surface (image) part of the result bitmap's
+  // pulDst - last line of surface (image) part of the result bitmap
   pulDst = &pulBitmap[ (surface->h - 1) * surface->w ];
-  // pulDstMask - last line of mask part of the result bitmap's
+  // pulDstMask - last line of mask part of the result bitmap
   pulDstMask = &pulBitmap[ (2 * surface->h - 1) * surface->w ];
   // pulSrc - first line of source image
   pulSrc = (PULONG)surface->pixels;
@@ -99,13 +99,13 @@ HPOINTER utilCreatePointer(SDL_Surface *surface, ULONG ulHotX, ULONG ulHotY)
   hbm = GpiCreateBitmap( hps, (PBITMAPINFOHEADER2)&bmih, CBM_INIT,
                          (PBYTE)pulBitmap, (PBITMAPINFO2)&bmi );
   if ( hbm == GPI_ERROR )
-    debug( "GpiCreateBitmap() failed" );
+    debug(SDL_LOG_CATEGORY_VIDEO, "GpiCreateBitmap() failed" );
   else
   {
     // Create a system pointer object.
     hptr = WinCreatePointer( HWND_DESKTOP, hbm, TRUE, ulHotX, ulHotY );
     if ( hptr == NULLHANDLE )
-      debug( "WinCreatePointer() failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "WinCreatePointer() failed" );
   }
   GpiDeleteBitmap( hbm );
 

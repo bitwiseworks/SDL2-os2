@@ -535,13 +535,13 @@ int OS2_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     hab = WinInitialize( 0 );
     if ( hab == NULLHANDLE )
     {
-      debug( "WinInitialize() failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "WinInitialize() failed" );
       return -1;
     }
     hmq = WinCreateMsgQueue( hab, 0 );
     if ( hmq == NULLHANDLE )
     {
-      debug( "WinCreateMsgQueue() failed" );
+      debug(SDL_LOG_CATEGORY_VIDEO, "WinCreateMsgQueue() failed" );
       return -1;
     }
   }

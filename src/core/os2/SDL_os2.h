@@ -8,12 +8,12 @@
 #if defined(__WATCOMC__)
 #if OS2DEBUG==SDLOUTPUT
 
-# define debug(s,...) SDL_LogDebug( SDL_LOG_CATEGORY_APPLICATION, \
+# define debug(category, s,...) SDL_LogDebug( category, \
                                     __func__"(): "##s, ##__VA_ARGS__ )
 
 #elif defined(OS2DEBUG)
 
-# define debug(s,...) printf( __func__"(): "##s"\n", ##__VA_ARGS__ )
+# define debug(category, s,...) printf( __func__"(): category: %i "##s"\n", category, ##__VA_ARGS__ )
 
 #else
 
@@ -30,11 +30,11 @@ void SDL_OS2Quit();
 
 #else
 #if OS2DEBUG==SDLOUTPUT
-# define debug(s,...) SDL_LogDebug( SDL_LOG_CATEGORY_APPLICATION, \
+# define debug(category, s,...) SDL_LogDebug( category, \
                                        "%s(): "s, __func__, ##__VA_ARGS__)
 #elif defined(OS2DEBUG)
-# define debug(s,...) printf("%s(): message: "s"\n", \
-                                       __func__, ##__VA_ARGS__)
+# define debug(category, s,...) printf("%s(): category: %i message: "s"\n", \
+                                       __func__, category, ##__VA_ARGS__)
 #else
 # define debug(s,...)
 #endif // OS2DEBUG

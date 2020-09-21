@@ -37,7 +37,7 @@ static SDL_Cursor* OS2_CreateCursor(SDL_Surface *surface, int hot_x, int hot_y)
 
   if ( ( surface->w > ulMaxW ) || ( surface->h > ulMaxH ) )
   {
-    debug( "Given image size is %u x %u, maximum allowed size is %u x %u",
+    debug(SDL_LOG_CATEGORY_VIDEO, "Given image size is %u x %u, maximum allowed size is %lu x %lu",
            surface->w, surface->h, ulMaxW, ulMaxH );
     return NULL;
   }
@@ -79,7 +79,7 @@ static SDL_Cursor* OS2_CreateSystemCursor(SDL_SystemCursor id)
     case SDL_SYSTEM_CURSOR_NO:        lSysId = SPTR_ILLEGAL;  break;
     case SDL_SYSTEM_CURSOR_HAND:      lSysId = SPTR_ARROW;    break;
     default:
-      debug( "Unknown cursor id: %u", id );
+      debug(SDL_LOG_CATEGORY_VIDEO, "Unknown cursor id: %u", id );
       return NULL;
   }
 
@@ -89,7 +89,7 @@ static SDL_Cursor* OS2_CreateSystemCursor(SDL_SystemCursor id)
                              id == SDL_SYSTEM_CURSOR_WAIT );
   if ( hptr == NULLHANDLE )
   {
-    debug( "Cannot load OS/2 system pointer %u for SDL cursor id %u",
+    debug(SDL_LOG_CATEGORY_VIDEO, "Cannot load OS/2 system pointer %li for SDL cursor id %u",
            lSysId, id );
     return NULL;
   }
