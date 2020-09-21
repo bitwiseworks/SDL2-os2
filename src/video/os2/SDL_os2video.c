@@ -1610,15 +1610,17 @@ static int OS2_VideoInit(_THIS)
 static void OS2_VideoQuit(_THIS)
 {
   PSDL_VideoData       pVData = (PSDL_VideoData)_this->driverdata;
-  ULONG                ulDisplayIdx, ulModeIdx;
-  SDL_VideoDisplay     *pSDLDisplay;
 
   OS2_QuitMouse( _this );
 
   WinDestroyMsgQueue( pVData->hmq );
   WinTerminate( pVData->hab );
 
+#if 0 // this is done in SDL_video.c, so no need to duplicate this part !!
+
   // We support only one display. Free all listed displays data for the future.
+  ULONG                ulDisplayIdx, ulModeIdx;
+  SDL_VideoDisplay     *pSDLDisplay;
   for( ulDisplayIdx = 0; ulDisplayIdx < _this->num_displays; ulDisplayIdx++ )
   {
     pSDLDisplay = &_this->displays[ulDisplayIdx];
@@ -1640,6 +1642,7 @@ static void OS2_VideoQuit(_THIS)
       pSDLDisplay->driverdata = NULL;
     }
   }
+#endif
 }
 
 static int OS2_GetDisplayBounds(_THIS, SDL_VideoDisplay *display,
