@@ -873,7 +873,11 @@ SDL_RenderDriver SW_RenderDriver = {
     SW_CreateRenderer,
     {
      "software",
+#if SDL_VIDEO_DRIVER_OS2
+     SDL_RENDERER_ACCELERATED | SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE,
+#else
      SDL_RENDERER_SOFTWARE | SDL_RENDERER_TARGETTEXTURE,
+#endif
      8,
      {
       SDL_PIXELFORMAT_ARGB8888,
