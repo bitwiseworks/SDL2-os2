@@ -332,9 +332,9 @@ static VOID _wmChar(PWINDATA pWinData, MPARAM mp1, MPARAM mp2)
 //    CHAR     acUTF8[4];
 //    LONG     lRC = StrUTF8( 1, &acUTF8, sizeof(acUTF8), (PSZ)&ulCharCode, 1 );
     PSZ      acUTF8;
-    acUTF8 = OS2_SysToUTF8(ulCharCode);
+    acUTF8 = OS2_SysToUTF8((PSZ)&ulCharCode);
 
-    SDL_SendKeyboardText( strlen(acUTF8) > 0 ? &acUTF8 : (PSZ)&ulCharCode );
+    SDL_SendKeyboardText( (acUTF8 != NULL && SDL_strlen(acUTF8) > 0) ? &acUTF8 : (PSZ)&ulCharCode );
   }
 }
 
