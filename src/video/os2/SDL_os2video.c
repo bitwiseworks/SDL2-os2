@@ -1576,6 +1576,8 @@ static int OS2_VideoInit(_THIS)
     stSDLDisplay.current_mode = stSDLDisplayMode;
     stSDLDisplay.driverdata = NULL;
     stSDLDisplay.num_display_modes = 0;
+    stSDLDisplay.max_display_modes = 0;
+    stSDLDisplay.fullscreen_window = NULL;
 
     pDisplayData = SDL_malloc( sizeof(DISPLAYDATA) );
     if ( pDisplayData != NULL )
@@ -1682,14 +1684,13 @@ static int OS2_GetDisplayDPI(_THIS, SDL_VideoDisplay *display, float *ddpi,
 
 static void OS2_GetDisplayModes(_THIS, SDL_VideoDisplay *display)
 {
-  SDL_DisplayMode *mode;
+  SDL_DisplayMode mode;
 	
   debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
-  mode = SDL_malloc( sizeof(SDL_DisplayMode) );
-  SDL_memcpy( mode, &display->current_mode, sizeof(SDL_DisplayMode) );
-  mode->driverdata = SDL_malloc( sizeof(MODEDATA) );
-  SDL_memcpy( mode->driverdata, display->current_mode.driverdata, sizeof(MODEDATA) );
-  SDL_AddDisplayMode( display, mode );
+  SDL_memcpy( &mode, &display->current_mode, sizeof(SDL_DisplayMode) );
+  mode.driverdata = SDL_malloc( sizeof(MODEDATA) );
+  SDL_memcpy( mode.driverdata, display->current_mode.driverdata, sizeof(MODEDATA) );
+  SDL_AddDisplayMode( display, &mode );
 }
 
 static int OS2_SetDisplayMode(_THIS, SDL_VideoDisplay *display,
