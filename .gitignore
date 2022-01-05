@@ -6,6 +6,8 @@ acinclude/ltversion.m4
 acinclude/lt~obsolete.m4
 build-scripts/ltmain.sh
 configure
+include/SDL_config.h.in~
+test/configure
 
 # ignore new files from autoreconf -fvi
 autom4te.cache/
