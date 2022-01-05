@@ -11,7 +11,7 @@ LIBFILE = geniconv.lib
 
 all: $(LIBFILE) test.exe .symbolic
 
-CFLAGS = -i=.\;$(%WATCOM)\H\OS2;$(%WATCOM)\H -bt=os2 -q -d0 -w2
+CFLAGS = -I$(%WATCOM)/h/os2 -I$(%WATCOM)/h -I. -bt=os2 -q -d0 -w2 -DGENICONV_STANDALONE=1
 
 SRCS = geniconv.c os2cp.c os2iconv.c
 SRCS+= sys2utf8.c
@@ -21,17 +21,17 @@ OBJS = $(SRCS:.c=.obj)
 LIBS = libuls.lib libconv.lib $(LIBFILE)
 
 test.exe: $(LIBFILE) test.obj
-  @wlink op quiet system os2v2 file $* lib {$(LIBS)} name $*
+  wlink op quiet system os2v2 file test.obj lib {$(LIBS)} name $*
 
 $(LIBFILE): $(OBJS)
-  @if exist $@ @del $@
-  @for %f in ($(OBJS)) do @wlib -b $* +%f >nul
+  @if exist $@ rm $@
+  @for %f in ($(OBJS)) do wlib -q -b $* +%f
 
-.c.obj: .AUTODEPEND
-    @wcc386 $[* $(CFLAGS)
+.c.obj:
+    wcc386 $(CFLAGS) -fo=$^@ $<
 
 clean: .SYMBOLIC
-  @if exist *.obj del *.obj
-  @if exist *.err del *.err
-  @if exist $(LIBFILE) del $(LIBFILE)
-  @if exist test.exe del test.exe
+  @if exist *.obj rm *.obj
+  @if exist *.err rm *.err
+  @if exist $(LIBFILE) rm $(LIBFILE)
+  @if exist test.exe rm test.exe

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -20,8 +20,8 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_os2video_h
-#define _SDL_os2video_h
+#ifndef SDL_os2video_h_
+#define SDL_os2video_h_
 
 #include "../SDL_sysvideo.h"
 #include "../../core/os2/SDL_os2.h"
@@ -34,50 +34,49 @@
 #define INCL_OS2MM
 #define INCL_DOSMEMMGR
 #include <os2.h>
-//#include <gradd.h>               // Defines FOURCC_xxxx
-
 
 #include "SDL_os2mouse.h"
 #include "SDL_os2output.h"
 
 typedef struct SDL_VideoData {
-  HAB                  hab;
-  HMQ                  hmq;
-  POS2VIDEOOUTPUT      pOutput;            // Video output routines.
-} SDL_VideoData, *PSDL_VideoData;
+    HAB             hab;
+    HMQ             hmq;
+    OS2VIDEOOUTPUT *pOutput; /* Video output routines */
+} SDL_VideoData;
 
 typedef struct _WINDATA {
-  SDL_Window           *window;
-  POS2VIDEOOUTPUT      pOutput;            // Video output routines.
-  HWND                 hwndFrame;
-  HWND                 hwnd;
-  PFNWP                fnUserWndProc;
-  PFNWP                fnWndFrameProc;
+    SDL_Window     *window;
+    OS2VIDEOOUTPUT *pOutput; /* Video output routines */
+    HWND            hwndFrame;
+    HWND            hwnd;
+    PFNWP           fnUserWndProc;
+    PFNWP           fnWndFrameProc;
 
-  PVODATA              pVOData;            // Video output data.
+    PVODATA         pVOData; /* Video output data */
 
-  HRGN                 hrgnShape;
-  HPOINTER             hptrIcon;
-  RECTL                rectlBeforeFS;
+    HRGN            hrgnShape;
+    HPOINTER        hptrIcon;
+    RECTL           rectlBeforeFS;
 
-  LONG                 lSkipWMSize;
-  LONG                 lSkipWMMove;
-  LONG                 lSkipWMMouseMove;
-  LONG                 lSkipWMVRNEnabled;
-  LONG                 lSkipWMAdjustFramePos;
-} WINDATA, *PWINDATA;
+    LONG            lSkipWMSize;
+    LONG            lSkipWMMove;
+    LONG            lSkipWMMouseMove;
+    LONG            lSkipWMVRNEnabled;
+    LONG            lSkipWMAdjustFramePos;
+} WINDATA;
 
 typedef struct _DISPLAYDATA {
-  ULONG                ulDPIHor;
-  ULONG                ulDPIVer;
-  ULONG                ulDPIDiag;
-} DISPLAYDATA, *PDISPLAYDATA;
+    ULONG           ulDPIHor;
+    ULONG           ulDPIVer;
+    ULONG           ulDPIDiag;
+} DISPLAYDATA;
 
 typedef struct _MODEDATA {
-  ULONG                ulDepth;
-  ULONG                fccColorEncoding;
-  ULONG                ulScanLineBytes;
-} MODEDATA, *PMODEDATA;
+    ULONG           ulDepth;
+    ULONG           fccColorEncoding;
+    ULONG           ulScanLineBytes;
+} MODEDATA;
 
+#endif /* SDL_os2video_h_ */
 
-#endif /* _SDL_os2video_h */
+/* vi: set ts=4 sw=4 expandtab: */

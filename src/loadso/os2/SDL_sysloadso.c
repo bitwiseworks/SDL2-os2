@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,7 +26,7 @@
 /* System dependent library loading routines                           */
 
 #include "SDL_loadso.h"
-#include ".\core\os2\SDL_os2.h"
+#include "../../core/os2/SDL_os2.h"
 
 #define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS
@@ -35,43 +35,48 @@
 void *
 SDL_LoadObject(const char *sofile)
 {
-  ULONG      ulRC;
-  HMODULE    hModule;
-  PSZ        pszModName = OS2_UTF8ToSys( sofile );
-  CHAR       acError[256];
+    ULONG   ulRC;
+    HMODULE hModule;
+    CHAR    acError[256];
+    PSZ     pszModName;
 
-  ulRC = DosLoadModule( &acError, sizeof(acError), pszModName, &hModule );
-  SDL_free( pszModName );
-  if ( ulRC != NO_ERROR )
-  {
-    SDL_SetError( "Failed loading, module: %s", pszModName );
-    return NULL;
-  }
+    if (!sofile) {
+        SDL_SetError("NULL sofile");
+        return NULL;
+    }
 
-  return (void *)hModule;
+    pszModName = OS2_UTF8ToSys(sofile);
+    ulRC = DosLoadModule(acError, sizeof(acError), pszModName, &hModule);
+    SDL_free(pszModName);
+    if (ulRC != NO_ERROR) {
+        SDL_SetError("Failed loading %s (E%u)", acError, ulRC);
+        return NULL;
+    }
+
+    return (void *)hModule;
 }
 
 void *
 SDL_LoadFunction(void *handle, const char *name)
 {
-  ULONG      ulRC;
-  PFN        pFN;
+    ULONG   ulRC;
+    PFN     pFN;
 
-  ulRC = DosQueryProcAddr( (HMODULE)handle, 0, name, &pFN );
-  if ( ulRC )
-  {
-    SDL_SetError( "Failed loading, procedure: %s", name );
-    return NULL;
-  }
+    ulRC = DosQueryProcAddr((HMODULE)handle, 0, name, &pFN);
+    if (ulRC != NO_ERROR) {
+        SDL_SetError("Failed loading procedure %s (E%u)", name, ulRC);
+        return NULL;
+    }
 
-  return (void *)pFN;
+    return (void *)pFN;
 }
 
 void
 SDL_UnloadObject(void *handle)
 {
-  if ( handle != NULL )
-    DosFreeModule( (HMODULE)handle );
+    if (handle != NULL) {
+        DosFreeModule((HMODULE)handle);
+    }
 }
 
 #endif /* SDL_LOADSO_OS2 */

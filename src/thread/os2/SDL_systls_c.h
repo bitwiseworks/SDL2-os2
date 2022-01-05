@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,13 +25,13 @@
 
 #include "../SDL_thread_c.h"
 
-extern SDL_TLSData     **ppSDLTLSData;
+extern SDL_TLSData **ppSDLTLSData;
 
-// SDL_OS2TLSAlloc() called from SDL_InitSubSystem()
-void SDL_OS2TLSAlloc();
+/* SDL_OS2TLSAlloc() called from SDL_InitSubSystem() */
+void SDL_OS2TLSAlloc(void);
 
-// SDL_OS2TLSFree() called from SDL_QuitSubSystem()
-void SDL_OS2TLSFree();
+/* SDL_OS2TLSFree() called from SDL_QuitSubSystem() */
+void SDL_OS2TLSFree(void);
 
 #endif /* SDL_THREAD_OS2 */
 
