@@ -23,9 +23,9 @@
 
 #include "SDL_log.h"
 #include "SDL_stdinc.h"
+#ifndef __LIBCN__
 #include "geniconv/geniconv.h"
 
-#ifndef __LIBCN__
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
 # define debug_os2(s,...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
@@ -55,7 +55,8 @@ void SDL_OS2Quit(void);
                                        "%s(): "s, __func__, ##__VA_ARGS__)
 #else
 # define debug(category, s,...) printf("%s(): category: %i message: "s"\n", \
-#endif                                       __func__, category, ##__VA_ARGS__)
+#                                       __func__, category, ##__VA_ARGS__)
+#endif
 #
 #else /* no debug */
 #
