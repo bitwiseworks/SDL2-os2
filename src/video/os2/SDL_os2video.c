@@ -324,10 +324,10 @@ static VOID _wmChar(WINDATA *pWinData, MPARAM mp1, MPARAM mp2)
 //      LONG    lRC = StrUTF8(1, acUTF8, sizeof(acUTF8), (PSZ)&ulCharCode, 1);
 
         PSZ      acUTF8;
-        acUTF8 = OS2_SysToUTF8((PSZ)&ulCharCode);
+        acUTF8 = (PSZ)OS2_SysToUTF8(&ulCharCode);
 
 //      SDL_SendKeyboardText((lRC > 0)? acUTF8 : (PSZ)&ulCharCode);
-        SDL_SendKeyboardText((acUTF8 != NULL && SDL_strlen(acUTF8) > 0)? &acUTF8 : (PSZ)&ulCharCode);
+        SDL_SendKeyboardText((acUTF8 != NULL && SDL_strlen((char *)acUTF8) > 0)? (char *)&acUTF8 : (char *)&ulCharCode);
     }
 }
 
@@ -359,7 +359,7 @@ static MRESULT _wmDragOver(WINDATA *pWinData, PDRAGINFO pDragInfo)
         pDragItem = DrgQueryDragitemPtr(pDragInfo, ulIdx);
 
         /* We accept WPS files only. */
-        if (!DrgVerifyRMF(pDragItem, "DRM_OS2FILE", NULL)) {
+        if (!DrgVerifyRMF(pDragItem, (PCSZ)"DRM_OS2FILE", NULL)) {
             usDrag   = DOR_NEVERDROP;
             usDragOp = DO_UNKNOWN;
             break;
@@ -402,14 +402,14 @@ static MRESULT _wmDrop(WINDATA *pWinData, PDRAGINFO pDragInfo)
     for (ulIdx = 0; ulIdx < pDragInfo->cditem; ulIdx++) {
         pDragItem = DrgQueryDragitemPtr(pDragInfo, ulIdx);
 
-        if (DrgVerifyRMF(pDragItem, "DRM_OS2FILE", NULL) &&
+        if (DrgVerifyRMF(pDragItem, (PCSZ)"DRM_OS2FILE", NULL) &&
             pDragItem->hstrContainerName != NULLHANDLE &&
             pDragItem->hstrSourceName != NULLHANDLE) {
             /* Get file name from the item. */
-            DrgQueryStrName(pDragItem->hstrContainerName, sizeof(acFName), acFName);
+            DrgQueryStrName(pDragItem->hstrContainerName, sizeof(acFName), (PSZ)acFName);
             pcFName = SDL_strchr(acFName, '\0');
             DrgQueryStrName(pDragItem->hstrSourceName,
-                            sizeof(acFName) - (pcFName - acFName), pcFName);
+                            sizeof(acFName) - (pcFName - acFName), (PSZ)pcFName);
 
             /* Send to SDL full file name converted to UTF-8. */
             pcFName = OS2_SysToUTF8(acFName);
@@ -759,7 +759,7 @@ static int OS2_CreateWindow(_THIS, SDL_Window *window)
         ulSWPFlags |= SWP_MINIMIZE;
 
     hwndFrame = WinCreateStdWindow(HWND_DESKTOP, 0, &ulFrameFlags,
-                                   WIN_CLIENT_CLASS, "SDL2", 0, 0, 0, &hwnd);
+                                   (PCSZ)WIN_CLIENT_CLASS, (PCSZ)"SDL2", 0, 0, 0, &hwnd);
     if (hwndFrame == NULLHANDLE)
         return SDL_SetError("Couldn't create window");
 
@@ -813,8 +813,8 @@ static int OS2_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
 
     /* User can accept client OR frame window handle.
      * Get client and frame window handles. */
-    WinQueryClassName(hwndUser, sizeof(acBuf), acBuf);
-    if (!WinQueryClassInfo(pVData->hab, acBuf, &stCI))
+    WinQueryClassName(hwndUser, sizeof(acBuf), (PCH)acBuf);
+    if (!WinQueryClassInfo(pVData->hab, (PCSZ)acBuf, &stCI))
         return SDL_SetError("Cannot get user window class information");
 
     if ((stCI.flClassStyle & CS_FRAME) == 0) {
@@ -835,8 +835,8 @@ static int OS2_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
 
         hwndFrame = hwndUser;
 
-        WinQueryClassName(hwnd, sizeof(acBuf), acBuf);
-        if (!WinQueryClassInfo(pVData->hab, acBuf, &stCI))
+        WinQueryClassName(hwnd, sizeof(acBuf), (PCH)acBuf);
+        if (!WinQueryClassInfo(pVData->hab, (PCSZ)acBuf, &stCI))
             return SDL_SetError("Cannot get client window class information");
     }
 
@@ -846,7 +846,7 @@ static int OS2_CreateWindowFrom(_THIS, SDL_Window *window, const void *data)
 
     /* Set SDL-window title */
     cbText = WinQueryWindowTextLength(hwndFrame);
-    pszText = SDL_stack_alloc(CHAR, cbText + 1);
+    pszText = (PSZ)SDL_stack_alloc(CHAR, cbText + 1);
 
     if (pszText != NULL)
         cbText = (pszText != NULL)? WinQueryWindowText(hwndFrame, cbText, pszText) : 0;
@@ -936,7 +936,7 @@ static void OS2_DestroyWindow(_THIS, SDL_Window * window)
 
 static void OS2_SetWindowTitle(_THIS, SDL_Window *window)
 {
-    PSZ pszTitle = (window->title == NULL)? NULL : OS2_UTF8ToSys(window->title);
+    PSZ pszTitle = (window->title == NULL)? NULL : (PSZ)OS2_UTF8ToSys(window->title);
 
     WinSetWindowText(((WINDATA *)window->driverdata)->hwndFrame, pszTitle);
     SDL_free(pszTitle);
@@ -1339,7 +1339,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
 {
     SDL_VideoData *pVData = (SDL_VideoData *)_this->driverdata;
     PSZ   pszClipboard;
-    PSZ   pszText = (text == NULL)? NULL : OS2_UTF8ToSys(text);
+    PSZ   pszText = (text == NULL)? NULL : (PSZ)OS2_UTF8ToSys(text);
     ULONG cbText;
     ULONG ulRC;
     BOOL  fSuccess;
@@ -1347,7 +1347,7 @@ static int OS2_SetClipboardText(_THIS, const char *text)
     debug(SDL_LOG_CATEGORY_VIDEO, "Enter");
     if (pszText == NULL)
         return -1;
-    cbText = SDL_strlen(pszText) + 1;
+    cbText = SDL_strlen((char *)pszText) + 1;
 
     ulRC = DosAllocSharedMem((PPVOID)&pszClipboard, 0, cbText,
                               PAG_COMMIT | PAG_READ | PAG_WRITE |
@@ -1390,11 +1390,11 @@ static char *OS2_GetClipboardText(_THIS)
     } else {
         pszClipboard = (PSZ)WinQueryClipbrdData(pVData->hab, CF_TEXT);
         if (pszClipboard != NULL)
-            pszClipboard = OS2_SysToUTF8(pszClipboard);
+            pszClipboard = (PSZ)OS2_SysToUTF8(pszClipboard);
         WinCloseClipbrd(pVData->hab);
     }
 
-    return (pszClipboard == NULL) ? SDL_strdup("") : pszClipboard;
+    return (pszClipboard == NULL) ? SDL_strdup("") : (char *)pszClipboard;
 }
 
 static SDL_bool OS2_HasClipboardText(_THIS)
@@ -1441,7 +1441,7 @@ static int OS2_VideoInit(_THIS)
         return SDL_SetError("Message queue cannot be created.");
     }
 
-    if (!WinRegisterClass(pVData->hab, WIN_CLIENT_CLASS, wndProc,
+    if (!WinRegisterClass(pVData->hab, (PCSZ)WIN_CLIENT_CLASS, wndProc,
                           CS_SIZEREDRAW | CS_MOVENOTIFY | CS_SYNCPAINT,
                           sizeof(SDL_VideoData*))) {
         SDL_free(pVData);

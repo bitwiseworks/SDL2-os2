@@ -3463,6 +3463,9 @@ CheckHIDAPI()
                 enable_hidapi_libusb=yes
                 require_hidapi_libusb=yes
                 ;;
+            *-*-os2* )
+            	libusb_lib="usb100.dll"
+            	;;
         esac
 
         hidapi_support=yes
@@ -4392,10 +4395,17 @@ case "$host" in
                 ac_default_prefix=$BUILD_PREFIX
             fi
         fi
+
+        BUILD_LDFLAGS="$BUILD_LDFLAGS -Zhigh-mem -Zomf -Zargs-wild -Zargs-resp -lcx -lmmpm2"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -idirafter /@unixroot/usr/include/os2tk45"
+
         CheckDeclarationAfterStatement
         CheckDLOPEN
         CheckClockGettime
         CheckPTHREAD
+        
+        SOURCES="$SOURCES $srcdir/src/locale/unix/*.c"
+        have_locale=yes
 
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
@@ -4433,6 +4443,14 @@ case "$host" in
             have_audio=yes
             SUMMARY_audio="${SUMMARY_audio} OS/2"
         fi
+        
+        if test x$enable_joystick = xyes; then
+            AC_DEFINE(SDL_JOYSTICK_OS2, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/joystick/os2/*.c"
+            SOURCES="$SOURCES $srcdir/src/joystick/steam/*.c"
+        fi
+        CheckHIDAPI
+
         ;;
     *)
         AC_MSG_ERROR([

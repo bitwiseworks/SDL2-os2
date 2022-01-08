@@ -62,7 +62,7 @@ static ULONG _getEnvULong(const char *name, ULONG ulMax, ULONG ulDefault)
 static int _MCIError(const char *func, ULONG ulResult)
 {
     CHAR    acBuf[128];
-    mciGetErrorString(ulResult, acBuf, sizeof(acBuf));
+    mciGetErrorString(ulResult, (PSZ)acBuf, sizeof(acBuf));
     return SDL_SetError("[%s] %s", func, acBuf);
 }
 
@@ -127,7 +127,7 @@ static void OS2_DetectDevices(void)
     ULONG                   ulHandle = 0;
 
     acBuf[0] = '\0';
-    stMCISysInfo.pszReturn    = acBuf;
+    stMCISysInfo.pszReturn    = (PSZ)acBuf;
     stMCISysInfo.ulRetSize    = sizeof(acBuf);
     stMCISysInfo.usDeviceType = MCI_DEVTYPE_AUDIO_AMPMIX;
     ulRC = mciSendCommand(0, MCI_SYSINFO, MCI_WAIT | MCI_SYSINFO_QUANTITY,
@@ -137,12 +137,12 @@ static void OS2_DetectDevices(void)
         return;
     }
 
-    ulDevicesNum = SDL_strtoul(stMCISysInfo.pszReturn, NULL, 10);
+    ulDevicesNum = SDL_strtoul((char *)stMCISysInfo.pszReturn, NULL, 10);
 
     for (stSysInfoParams.ulNumber = 0; stSysInfoParams.ulNumber < ulDevicesNum;
          stSysInfoParams.ulNumber++) {
         /* Get device install name. */
-        stSysInfoParams.pszReturn    = acBuf;
+        stSysInfoParams.pszReturn    = (PSZ)acBuf;
         stSysInfoParams.ulRetSize    = sizeof(acBuf);
         stSysInfoParams.usDeviceType = MCI_DEVTYPE_AUDIO_AMPMIX;
         ulRC = mciSendCommand(0, MCI_SYSINFO, MCI_WAIT | MCI_SYSINFO_INSTALLNAME,
@@ -155,7 +155,7 @@ static void OS2_DetectDevices(void)
         /* Get textual product description. */
         stSysInfoParams.ulItem = MCI_SYSINFO_QUERY_DRIVER;
         stSysInfoParams.pSysInfoParm = &stLogDevice;
-        SDL_strlcpy(stLogDevice.szInstallName, stSysInfoParams.pszReturn, MAX_DEVICE_NAME);
+        SDL_strlcpy(stLogDevice.szInstallName, (char *)stSysInfoParams.pszReturn, MAX_DEVICE_NAME);
         ulRC = mciSendCommand(0, MCI_SYSINFO, MCI_WAIT | MCI_SYSINFO_ITEM,
                               &stSysInfoParams, 0);
         if (ulRC != NO_ERROR) {

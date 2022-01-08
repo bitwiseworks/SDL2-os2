@@ -12,3 +12,4 @@ test/configure
 # ignore new files from autoreconf -fvi
 autom4te.cache/
 aclocal.m4
+*.exe

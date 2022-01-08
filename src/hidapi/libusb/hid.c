@@ -35,6 +35,20 @@
 #define wcsdup _wcsdup
 #endif
 
+#if defined(__OS2__) && !defined(wcsdup)
+wchar_t* wcsdup( const wchar_t* str )
+{
+  wchar_t* ret = NULL;
+  if (str)
+  {
+    int size = (wcslen(str) + 1) * sizeof(wchar_t);
+    ret = malloc( size );
+    if (ret) memcpy( ret, str, size );
+  }
+  return ret;
+}
+#endif
+
 #include <libusb.h>
 #include <locale.h> /* setlocale */
 

@@ -27,7 +27,6 @@ NativeWindowFactory OS2WindowFactory = {
 
 static void *CreateWindowNative(int w, int h)
 {
-<<<<<<< HEAD
 
 
 

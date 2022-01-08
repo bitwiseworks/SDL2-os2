@@ -206,7 +206,7 @@ static BOOL voSetVisibleRegion(PVODATA pVOData, HWND hwnd,
                 return TRUE;
             }
 
-            SDL_SetError("DiveSetupBlitter(), rc = 0x%X", ulRC);
+            SDL_SetError("DiveSetupBlitter(), rc = 0x%lX", ulRC);
         } /* if (prectl != NULL) */
     } /* if (hrgn == NULLHANDLE) else */
 

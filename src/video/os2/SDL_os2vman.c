@@ -98,7 +98,7 @@ static BOOL _vmanInit(void)
         return TRUE;
 
     /* Load vman.dll */
-    ulRC = DosLoadModule(acBuf, sizeof(acBuf), "VMAN", &hmodVMan);
+    ulRC = DosLoadModule((PSZ)acBuf, sizeof(acBuf), (PCSZ)"VMAN", &hmodVMan);
     if (ulRC != NO_ERROR) {
         debug(SDL_LOG_CATEGORY_VIDEO, "Could not load VMAN.DLL, rc = %u : %s", ulRC, &acBuf);
         hmodVMan = NULLHANDLE;
@@ -106,7 +106,7 @@ static BOOL _vmanInit(void)
     }
 
     /* Get VMIEntry */
-    ulRC = DosQueryProcAddr(hmodVMan, 0L, "VMIEntry", (PFN *)&pfnVMIEntry);
+    ulRC = DosQueryProcAddr(hmodVMan, 0L, (PCSZ)"VMIEntry", (PFN *)&pfnVMIEntry);
     if (ulRC != NO_ERROR) {
         debug(SDL_LOG_CATEGORY_VIDEO, "Could not query address of pfnVMIEntry func. of VMAN.DLL, "
               "rc = %u", ulRC);

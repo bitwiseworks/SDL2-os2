@@ -42,8 +42,8 @@
 
 
 /* StrUTF8New() - geniconv/sys2utf8.c */
-#define OS2_SysToUTF8(S) StrUTF8New(1,         (S), SDL_strlen((S)) + 1)
-#define OS2_UTF8ToSys(S) StrUTF8New(0, (char *)(S), SDL_strlen((S)) + 1)
+#define OS2_SysToUTF8(S) StrUTF8New(1, (char *)(S), SDL_strlen((char *)(S)) + 1)
+#define OS2_UTF8ToSys(S) StrUTF8New(0, (char *)(S), SDL_strlen((char *)(S)) + 1)
 
 /* SDL_OS2Quit() will be called from SDL_QuitSubSystem() */
 void SDL_OS2Quit(void);
@@ -64,8 +64,8 @@ void SDL_OS2Quit(void);
 #
 #endif /* OS2DEBUG */
 
-#define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
-#define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
+#define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen((char *)(S))+1)
+#define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen((char *)(S))+1)
 #endif
 
 #endif /* SDL_os2_h_ */

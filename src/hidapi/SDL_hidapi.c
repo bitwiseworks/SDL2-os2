@@ -653,6 +653,8 @@ static const SDL_UDEV_Symbols *udev_ctx = NULL;
 #ifdef SDL_JOYSTICK_HIDAPI_STEAMXBOX
 #undef HIDAPI_H__
 #include "steamxbox/hid.c"
+#elif defined(__OS2__)
+// We want to use libusb
 #else
 #error Need a driver hid.c for this platform!
 #endif
