@@ -830,7 +830,7 @@
 /* #undef SDL_LIBSAMPLERATE_DYNAMIC */
 
 /* */
-/* #undef SDL_LIBUSB_DYNAMIC */
+#define SDL_LIBUSB_DYNAMIC "usb100.dll"
 
 /* */
 /* #undef SDL_LOADSO_DISABLED */

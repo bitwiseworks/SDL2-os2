@@ -3464,7 +3464,7 @@ CheckHIDAPI()
                 require_hidapi_libusb=yes
                 ;;
             *-*-os2* )
-            	libusb_lib="usb100.dll"
+            	enable_hidapi_libusb=yes
             	;;
         esac
 
@@ -3497,6 +3497,9 @@ CheckHIDAPI()
                             ;;
                         *-*-cygwin* | *-*-mingw* )
                             libusb_lib="libusb-1.0.dll"
+                            ;;
+                        *-*-os2* )
+                            libusb_lib="usb100.dll"
                             ;;
                     esac
                     if test x$libusb_lib = x; then
