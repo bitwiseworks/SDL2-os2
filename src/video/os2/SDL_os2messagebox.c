@@ -66,7 +66,7 @@ static VOID _wmInitDlg(HWND hwnd, MSGBOXDLGDATA *pDlgData)
     hEnum = WinBeginEnumWindows(hwnd);
 
     while ((hWndNext = WinGetNextWindow(hEnum)) != NULLHANDLE) {
-        if (WinQueryClassName(hWndNext, sizeof(acBuf), acBuf) == 0) {
+        if (WinQueryClassName(hWndNext, sizeof(acBuf), (PCH)acBuf) == 0) {
             continue;
         }
         if (SDL_strcmp(acBuf, "#3") == 0) { /* Class name of button. */
@@ -85,8 +85,8 @@ static VOID _wmInitDlg(HWND hwnd, MSGBOXDLGDATA *pDlgData)
 
     for(ulIdx = 0; ulIdx < cButtons; ulIdx++) {
         /* Query size of text in window coordinates. */
-        cbBuf = WinQueryWindowText(aButtons[ulIdx].hwnd, sizeof(acBuf), acBuf);
-        GpiQueryTextBox(hps, cbBuf, acBuf, TXTBOX_COUNT, aptText);
+        cbBuf = WinQueryWindowText(aButtons[ulIdx].hwnd, sizeof(acBuf), (PCH)acBuf);
+        GpiQueryTextBox(hps, cbBuf, (PCH)acBuf, TXTBOX_COUNT, aptText);
         aptText[TXTBOX_TOPRIGHT].x -= aptText[TXTBOX_BOTTOMLEFT].x;
         aptText[TXTBOX_TOPRIGHT].y -= aptText[TXTBOX_BOTTOMLEFT].y;
         /* Convert text size to dialog coordinates. */
@@ -205,10 +205,10 @@ static HWND _makeDlg(const SDL_MessageBoxData *messageboxdata)
         pSDLBtnData =  (SDL_MessageBoxButtonData *)messageboxdata->buttons;
     ULONG               cSDLBtnData = messageboxdata->numbuttons;
 
-    PSZ                 pszTitle = OS2_UTF8ToSys((PSZ) messageboxdata->title);
-    ULONG               cbTitle  = (pszTitle == NULL)? 1 : (SDL_strlen(pszTitle) + 1);
-    PSZ                 pszText  = OS2_UTF8ToSys((PSZ) messageboxdata->message);
-    ULONG               cbText   = (pszText  == NULL)? 1 : (SDL_strlen(pszText) + 1);
+    PSZ                 pszTitle = (PSZ)OS2_UTF8ToSys(messageboxdata->title);
+    ULONG               cbTitle  = (pszTitle == NULL)? 1 : (SDL_strlen((char *)pszTitle) + 1);
+    PSZ                 pszText  = (PSZ)OS2_UTF8ToSys(messageboxdata->message);
+    ULONG               cbText   = (pszText  == NULL)? 1 : (SDL_strlen((char *)pszText) + 1);
 
     PDLGTEMPLATE        pTemplate;
     ULONG               cbTemplate;
@@ -237,7 +237,7 @@ static HWND _makeDlg(const SDL_MessageBoxData *messageboxdata)
     /* Button items datas - text for buttons. */
     for (ulIdx = 0; ulIdx < cSDLBtnData; ulIdx++) {
         pszBtnText = (PSZ)pSDLBtnData[ulIdx].text;
-        cbTemplate += (pszBtnText == NULL)? 1 : (SDL_strlen(pszBtnText) + 1);
+        cbTemplate += (pszBtnText == NULL)? 1 : (SDL_strlen((char *)pszBtnText) + 1);
     }
 
     /* Presentation parameter space. */
@@ -406,8 +406,8 @@ static HWND _makeDlg(const SDL_MessageBoxData *messageboxdata)
         pDlgItem->cchClassName = 0;  /* 0 - offClassname is WC_ constant. */
         pDlgItem->offClassName = (USHORT)WC_BUTTON;
 
-        pszBtnText = OS2_UTF8ToSys((PSZ)pSDLBtnData[ulIdx].text);
-        cbBtnText = (pszBtnText == NULL)? 1 : (SDL_strlen(pszBtnText) + 1);
+        pszBtnText = (PSZ)OS2_UTF8ToSys(pSDLBtnData[ulIdx].text);
+        cbBtnText = (pszBtnText == NULL)? 1 : (SDL_strlen((char *)pszBtnText) + 1);
         pDlgItem->cchText = cbBtnText;
         pDlgItem->offText = pcDlgData - (PCHAR)pTemplate; /* Offset to the text. */
         /* Copy text for the button into the dialog template. */
