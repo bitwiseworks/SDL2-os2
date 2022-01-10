@@ -102,6 +102,24 @@ static int SDL_WaitThreadBarrier(SDL_ThreadBarrier *barrier)
 	return 0;
 }
 
+#if defined(__OS2__) && !defined(wcsdup)
+#include <wchar.h>
+#include <string.h>
+#include <stdlib.h>
+
+/* Duplicate S, returning an identical malloc'd string.	 */
+wchar_t* wcsdup(const wchar_t *s)
+{
+	size_t len = (wcslen (s) + 1) * sizeof (wchar_t);
+	void *new = malloc (len);
+
+	if (new == NULL)
+		return NULL;
+
+	return (wchar_t *) memcpy (new, (void *) s, len);
+}
+#endif
+
 #if defined(__cplusplus) && !defined(NAMESPACE)
 extern "C" {
 #endif
