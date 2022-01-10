@@ -4403,6 +4403,10 @@ case "$host" in
         CheckClockGettime
         CheckPTHREAD
 
+        # Set up files for the locale library
+        SOURCES="$SOURCES $srcdir/src/locale/unix/*.c"
+        have_locale=yes
+
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
                 AC_DEFINE(SDL_JOYSTICK_OS2, 1, [ ])
