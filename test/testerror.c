@@ -31,12 +31,7 @@ int SDLCALL
 ThreadFunc(void *data)
 {
     /* Set the child thread error string */
-#if defined(__WATCOMC__)
-    /* Digi: "%lu" is not valid for SDL2 ! */
-    SDL_SetError("Thread %s (%u) had a problem: %s",
-#else
     SDL_SetError("Thread %s (%lu) had a problem: %s",
-#endif
                  (char *) data, SDL_ThreadID(), "nevermind");
     while (alive) {
         SDL_Log("Thread '%s' is alive!\n", (char *) data);
