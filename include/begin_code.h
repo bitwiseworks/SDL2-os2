@@ -76,8 +76,11 @@
 #ifndef SDLCALL
 #if (defined(__WIN32__) || defined(__WINRT__)) && !defined(__GNUC__)
 #define SDLCALL __cdecl
-#elif defined(__OS2__) && defined(__WATCOMC__)
+#elif defined(__OS2__) || defined(__EMX__)
 #define SDLCALL _System
+# if defined (__GNUC__) && !defined(_System)
+#  define _System /* for old EMX/GCC compat.  */
+# endif
 #else
 #define SDLCALL
 #endif
