@@ -164,6 +164,12 @@ else()
   set(UNIX_OR_MAC_SYS OFF)
 endif()
 
+if(UNIX OR OS2)
+  set(UNIX_OR_OS2_SYS ON)
+else()
+  set(UNIX_OR_OS2_SYS OFF)
+endif()
+
 # Emscripten pthreads work, but you need to have a non-pthread fallback build
 #  for systems without support. It's not currently enough to not use
 #  pthread functions in a pthread-build; it won't start up on unsupported
@@ -171,7 +177,7 @@ endif()
 #  for the time being. This default with change to ON once this becomes
 #  commonly supported in browsers or the Emscripten teams makes a single
 #  binary work everywhere.
-if (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN)
+if (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN OR OS2)
   set(SDL_PTHREADS_ENABLED_BY_DEFAULT ON)
 else()
   set(SDL_PTHREADS_ENABLED_BY_DEFAULT OFF)
@@ -410,7 +416,7 @@ dep_option(SDL_FUSIONSOUND_SHARED  "Dynamically load fusionsound audio support" 
 set_option(SDL_LIBSAMPLERATE       "Use libsamplerate for audio rate conversion" ${UNIX_SYS})
 dep_option(SDL_LIBSAMPLERATE_SHARED "Dynamically load libsamplerate" ON "SDL_LIBSAMPLERATE" OFF)
 set_option(SDL_RPATH               "Use an rpath when linking SDL" ${UNIX_SYS})
-set_option(SDL_CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" ${UNIX_SYS})
+set_option(SDL_CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" ${UNIX_OR_OS2_SYS})
 set_option(SDL_X11                 "Use X11 video driver" ${UNIX_SYS})
 dep_option(SDL_X11_SHARED          "Dynamically load X11 support" ON "SDL_X11" OFF)
 set(SDL_X11_OPTIONS Xcursor Xdbe Xinerama XInput Xfixes Xrandr Xscrnsaver XShape Xvm)
@@ -981,7 +987,7 @@ if(SDL_AUDIO)
   endif()
 endif()
 
-if(UNIX OR APPLE)
+if(UNIX OR APPLE OR OS2)
   # Relevant for Unix/Darwin only
   set(DYNAPI_NEEDS_DLOPEN 1)
   CheckDLOPEN()
@@ -2352,6 +2358,71 @@ elseif(VITA)
 
 #  CheckPTHREAD()
 
+elseif(OS2)
+  file(GLOB CORE_SOURCES ${SDL2_SOURCE_DIR}/src/core/os2/*.c)
+  set(SOURCE_FILES ${SOURCE_FILES} ${CORE_SOURCES})
+
+  if(SDL_CLOCK_GETTIME)
+    check_library_exists(c clock_gettime "" FOUND_CLOCK_GETTIME)
+    if(FOUND_CLOCK_GETTIME)
+      set(HAVE_CLOCK_GETTIME 1)
+    endif()
+  endif()
+
+  if(SDL_AUDIO)
+    set(SDL_AUDIO_DRIVER_OS2 1)
+    file(GLOB OS2_AUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/os2/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${OS2_AUDIO_SOURCES})
+    set(HAVE_SDL_AUDIO TRUE)
+  endif()
+
+  if(SDL_JOYSTICK)
+    set(SDL_JOYSTICK_OS2 1)
+    file(GLOB OS2_JOYSTICK_SOURCES ${SDL2_SOURCE_DIR}/src/joystick/os2/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${OS2_JOYSTICK_SOURCES})
+    set(HAVE_SDL_JOYSTICK TRUE)
+  endif()
+
+  if(SDL_VIDEO)
+    set(SDL_VIDEO_DRIVER_OS2 1)
+    file(GLOB OS2_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/os2/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${OS2_VIDEO_SOURCES})
+    set(HAVE_SDL_VIDEO TRUE)
+  endif()
+
+  if(SDL_FILESYSTEM)
+    set(SDL_FILESYSTEM_OS2 1)
+    file(GLOB FILESYSTEM_SOURCES ${SDL2_SOURCE_DIR}/src/filesystem/os2/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${FILESYSTEM_SOURCES})
+    set(HAVE_SDL_FILESYSTEM TRUE)
+  endif()
+
+  if(SDL_TIMERS)
+    set(SDL_TIMER_UNIX 1)
+    file(GLOB TIMER_SOURCES ${SDL2_SOURCE_DIR}/src/timer/unix/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${TIMER_SOURCES})
+    set(HAVE_SDL_TIMERS TRUE)
+  endif()
+
+  if(SDL_POWER)
+    set(SDL_POWER_OS2 1)
+    file(GLOB OS2_POWER_SOURCES ${SDL2_SOURCE_DIR}/src/power/os2/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${OS2_POWER_SOURCES})
+    set(HAVE_SDL_POWER TRUE)
+  endif()
+
+  if(SDL_LOCALE)
+    file(GLOB LOCALE_SOURCES ${SDL2_SOURCE_DIR}/src/locale/unix/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${LOCALE_SOURCES})
+    set(HAVE_SDL_LOCALE TRUE)
+  endif()
+
+  CheckPTHREAD()
+
+  if(SDL_HIDAPI)
+    CheckHIDAPI()
+  endif()
+
 endif()
 
 if(SDL_VULKAN AND NOT SDL_LOADSO)
@@ -2828,7 +2899,7 @@ if(NOT (WINDOWS OR CYGWIN) OR MINGW)
   if(SDL_SHARED)
     set(SOEXT ${CMAKE_SHARED_LIBRARY_SUFFIX}) # ".so", ".dylib", etc.
     get_target_property(SONAME SDL2 OUTPUT_NAME)
-    if(NOT ANDROID AND NOT MINGW)
+    if(NOT ANDROID AND NOT MINGW AND NOT OS2)
         install(CODE "
           execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
             \"lib${SONAME}${SOPOSTFIX}${SOEXT}\" \"libSDL2${SOPOSTFIX}${SOEXT}\"
