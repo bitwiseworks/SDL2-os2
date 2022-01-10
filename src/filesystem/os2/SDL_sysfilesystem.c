@@ -29,12 +29,7 @@
 #include "SDL_filesystem.h"
 #include "../../core/os2/SDL_os2.h"
 
-#ifndef __WATCOMC__
-#include <sys/types.h>
-#include <direct.h>
-#else
 #define INCL_DOSFILEMGR
-#endif
 #define INCL_DOSPROCESS
 #define INCL_DOSERRORS
 #include <os2.h>
@@ -110,11 +105,7 @@ SDL_GetPrefPath(const char *org, const char *app)
     if (lPosApp < 0)
         return NULL;
 
-#ifdef __WATCOMC__
     DosCreateDir(acBuf, NULL);
-#else
-    mkdir(acBuf, 0700);
-#endif
 
     pszApp = (PSZ)OS2_UTF8ToSys(app);
     if (!pszApp) {
@@ -127,11 +118,7 @@ SDL_GetPrefPath(const char *org, const char *app)
     if (lPosOrg < 0)
         return NULL;
 
-#ifdef __WATCOMC__
     DosCreateDir(acBuf, NULL);
-#else
-    mkdir(acBuf, 0700);
-#endif
     *((PUSHORT)&acBuf[lPosApp + lPosOrg]) = (USHORT)'\0\\';
 
     return OS2_SysToUTF8(acBuf);
