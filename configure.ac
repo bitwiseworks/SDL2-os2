@@ -3463,6 +3463,9 @@ CheckHIDAPI()
                 enable_hidapi_libusb=yes
                 require_hidapi_libusb=yes
                 ;;
+            *-*-os2* )
+                enable_hidapi_libusb=yes
+                ;;
         esac
 
         hidapi_support=yes
@@ -3494,6 +3497,9 @@ CheckHIDAPI()
                             ;;
                         *-*-cygwin* | *-*-mingw* )
                             libusb_lib="libusb-1.0.dll"
+                            ;;
+                        *-*-os2* )
+                            libusb_lib="usb100.dll"
                             ;;
                     esac
                     if test x$libusb_lib = x; then
@@ -4396,6 +4402,15 @@ case "$host" in
         CheckDLOPEN
         CheckClockGettime
         CheckPTHREAD
+
+        # Set up files for the joystick library
+        if test x$enable_joystick = xyes; then
+                AC_DEFINE(SDL_JOYSTICK_OS2, 1, [ ])
+                SOURCES="$SOURCES $srcdir/src/joystick/os2/*.c"
+                SOURCES="$SOURCES $srcdir/src/joystick/steam/*.c"
+                have_joystick=yes
+        fi
+        CheckHIDAPI
 
         # Set up files for the timer library
         if test x$enable_timers = xyes; then

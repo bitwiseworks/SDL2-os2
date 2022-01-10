@@ -659,7 +659,7 @@ static int joyPortOpen(HFILE * hGame)
 	if (*hGame != NULLHANDLE) return 0;
 
 	/* Open GAME$ for read */
-	rc = DosOpen("GAME$   ", hGame, &ulAction, 0, FILE_READONLY,
+	rc = DosOpen((PCSZ)"GAME$   ", hGame, &ulAction, 0, FILE_READONLY,
 		     FILE_OPEN, OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE, NULL);
 	if (rc != 0)
 	{
@@ -702,16 +702,24 @@ static int joyGetEnv(struct _joycfg * joydata)
 	char tempnumber[5];		/* Temporary place to put numeric texts */
 
 	joyenv = SDL_getenv("SDL_OS2_JOYSTICK");
-	if (joyenv == NULL) return 0;
+	if (joyenv == NULL)
+            return 0;
 
 	/* Joystick Environment is defined! */
-	while (*joyenv == ' ' && *joyenv != 0) joyenv++; /* jump spaces... */
+	while (*joyenv == ' ' && *joyenv != 0)
+            joyenv++; /* jump spaces... */
 
 	/* If the string name starts with '... get if fully */
-	if (*joyenv == '\'') joyenv += joyGetData(++joyenv,joydata->name,'\'',sizeof(joydata->name));
+	if (*joyenv == '\'') {
+            joyenv ++;
+            joyenv += joyGetData(joyenv,joydata->name,'\'',sizeof(joydata->name));
 	/* If not, get it until the next space */
-	else if (*joyenv == '\"') joyenv += joyGetData(++joyenv,joydata->name,'\"',sizeof(joydata->name));
-	else joyenv += joyGetData(joyenv,joydata->name,' ',sizeof(joydata->name));
+	} else if (*joyenv == '\"') {
+            joyenv ++;
+            joyenv += joyGetData(joyenv,joydata->name,'\"',sizeof(joydata->name));
+	} else {
+            joyenv += joyGetData(joyenv,joydata->name,' ',sizeof(joydata->name));
+        }
 
 	/* Now get the number of axes */
 	while (*joyenv == ' ' && *joyenv != 0) joyenv++; /* jump spaces... */
