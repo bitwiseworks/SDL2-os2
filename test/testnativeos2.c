@@ -27,10 +27,6 @@ NativeWindowFactory OS2WindowFactory = {
 
 static void *CreateWindowNative(int w, int h)
 {
-<<<<<<< HEAD
-
-
-
     HWND    hwnd, hwndFrame;
     ULONG   ulFrameFlags = FCF_TASKLIST | FCF_DLGBORDER | FCF_TITLEBAR |
                            FCF_SYSMENU  | FCF_SHELLPOSITION |
