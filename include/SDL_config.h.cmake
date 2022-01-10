@@ -468,7 +468,6 @@
 #cmakedefine SDL_POWER_HAIKU @SDL_POWER_HAIKU@
 #cmakedefine SDL_POWER_EMSCRIPTEN @SDL_POWER_EMSCRIPTEN@
 #cmakedefine SDL_POWER_HARDWIRED @SDL_POWER_HARDWIRED@
-#cmakedefine SDL_POWER_OS2 @SDL_POWER_OS2@
 #cmakedefine SDL_POWER_VITA @SDL_POWER_VITA@
 
 /* Enable system filesystem support */
