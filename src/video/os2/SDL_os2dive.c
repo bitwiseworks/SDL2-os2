@@ -325,3 +325,5 @@ static BOOL voUpdate(PVODATA pVOData, HWND hwnd, SDL_Rect *pSDLRects,
 
     return ulRC == DIVE_SUCCESS;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */
