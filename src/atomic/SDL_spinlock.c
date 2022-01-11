@@ -50,21 +50,6 @@ extern __inline int _SDL_xchg_watcom(volatile int *a, int v);
   modify exact [eax];
 #endif /* __WATCOMC__ && __386__ */
 
-#if defined(__WATCOMC__)
-
-int flLock(volatile int *lock);
-#pragma aux flLock = \
-"      mov    eax, 1     " \
-" lock xchg   eax, [ebx] " \
-parm [ebx] value [eax];
-
-void flClear(volatile int *lock);
-#pragma aux flClear = \
-" lock and [eax], 0x00 "\
-parm [eax]; 
-
-#endif
-
 /* This function is where all the magic happens... */
 SDL_bool
 SDL_AtomicTryLock(SDL_SpinLock *lock)
@@ -147,9 +132,6 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     /* Used for Solaris with non-gcc compilers. */
     return (SDL_bool) ((int) atomic_cas_32((volatile uint32_t*)lock, 0, 1) == 0);
 
-#elif defined(__WATCOMC__)
-    return flLock( lock ) == 0;
-
 #else
 #error Please implement for your platform.
     return SDL_FALSE;
@@ -212,9 +194,6 @@ SDL_AtomicUnlock(SDL_SpinLock *lock)
     /* Used for Solaris when not using gcc. */
     *lock = 0;
     membar_producer();
-
-#elif defined(__WATCOMC__)
-    flClear( lock );
 
 #else
     *lock = 0;
