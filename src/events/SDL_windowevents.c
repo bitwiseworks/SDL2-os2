@@ -71,9 +71,6 @@ RemovePendingExposedEvents(void * userdata, SDL_Event *event)
 }
 
 int
-#ifdef __OS2__
-SDLCALL
-#endif
 SDL_SendWindowEvent(SDL_Window * window, Uint8 windowevent, int data1,
                     int data2)
 {
