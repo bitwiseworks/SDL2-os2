@@ -2404,13 +2404,6 @@ elseif(OS2)
     set(HAVE_SDL_TIMERS TRUE)
   endif()
 
-  if(SDL_POWER)
-    set(SDL_POWER_OS2 1)
-    file(GLOB OS2_POWER_SOURCES ${SDL2_SOURCE_DIR}/src/power/os2/*.c)
-    set(SOURCE_FILES ${SOURCE_FILES} ${OS2_POWER_SOURCES})
-    set(HAVE_SDL_POWER TRUE)
-  endif()
-
   if(SDL_LOCALE)
     file(GLOB LOCALE_SOURCES ${SDL2_SOURCE_DIR}/src/locale/unix/*.c)
     set(SOURCE_FILES ${SOURCE_FILES} ${LOCALE_SOURCES})

@@ -4423,13 +4423,6 @@ case "$host" in
             have_timers=yes
         fi
 
-        # Set up files for the power library
-        if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_OS2, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/power/os2/*.c"
-            have_power=yes
-        fi
-
         # Set up files for the filesystem library
         if test x$enable_filesystem = xyes; then
             AC_DEFINE(SDL_FILESYSTEM_OS2, 1, [ ])
