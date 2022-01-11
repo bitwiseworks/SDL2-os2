@@ -4411,7 +4411,6 @@ case "$host" in
         if test x$enable_joystick = xyes; then
                 AC_DEFINE(SDL_JOYSTICK_OS2, 1, [ ])
                 SOURCES="$SOURCES $srcdir/src/joystick/os2/*.c"
-                SOURCES="$SOURCES $srcdir/src/joystick/steam/*.c"
                 have_joystick=yes
         fi
         CheckHIDAPI
