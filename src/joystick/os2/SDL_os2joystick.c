@@ -659,7 +659,7 @@ static int joyPortOpen(HFILE * hGame)
 	if (*hGame != NULLHANDLE) return 0;
 
 	/* Open GAME$ for read */
-	rc = DosOpen((PCSZ)"GAME$   ", hGame, &ulAction, 0, FILE_READONLY,
+	rc = DosOpen("GAME$   ", hGame, &ulAction, 0, FILE_READONLY,
 		     FILE_OPEN, OPEN_ACCESS_READONLY | OPEN_SHARE_DENYNONE, NULL);
 	if (rc != 0)
 	{

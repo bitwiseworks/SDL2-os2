@@ -87,9 +87,9 @@ SDL_GetPrefPath(const char *org, const char *app)
         return NULL;
     }
 
-    pszPath = (PSZ)SDL_getenv("HOME");
+    pszPath = SDL_getenv("HOME");
     if (!pszPath) {
-        pszPath = (PSZ)SDL_getenv("ETC");
+        pszPath = SDL_getenv("ETC");
         if (!pszPath) {
             SDL_SetError("HOME or ETC environment not set");
             return NULL;
@@ -99,7 +99,7 @@ SDL_GetPrefPath(const char *org, const char *app)
     if (!org) {
         lPosApp = SDL_snprintf(acBuf, sizeof(acBuf) - 1, "%s", pszPath);
     } else {
-        pszOrg = (PSZ)OS2_UTF8ToSys(org);
+        pszOrg = OS2_UTF8ToSys(org);
         if (!pszOrg) {
             SDL_OutOfMemory();
             return NULL;
@@ -116,7 +116,7 @@ SDL_GetPrefPath(const char *org, const char *app)
     mkdir(acBuf, 0700);
 #endif
 
-    pszApp = (PSZ)OS2_UTF8ToSys(app);
+    pszApp = OS2_UTF8ToSys(app);
     if (!pszApp) {
         SDL_OutOfMemory();
         return NULL;

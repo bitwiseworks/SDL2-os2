@@ -4398,6 +4398,7 @@ case "$host" in
                 ac_default_prefix=$BUILD_PREFIX
             fi
         fi
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -DOS2EMX_PLAIN_CHAR"
         CheckDeclarationAfterStatement
         CheckDLOPEN
         CheckClockGettime

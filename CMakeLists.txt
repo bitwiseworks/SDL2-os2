@@ -2362,6 +2362,9 @@ elseif(VITA)
 #  CheckPTHREAD()
 
 elseif(OS2)
+  # we have to use this, to get rid of a lot warnings about PSZ and friends
+  list(APPEND EXTRA_CFLAGS "-DOS2EMX_PLAIN_CHAR")
+
   file(GLOB CORE_SOURCES ${SDL2_SOURCE_DIR}/src/core/os2/*.c)
   set(SOURCE_FILES ${SOURCE_FILES} ${CORE_SOURCES})
 
