@@ -76,6 +76,8 @@ elseif(WINDOWS)
     add_executable(testnative testnative.c testnativew32.c)
 elseif(UNIX)
     add_executable(testnative testnative.c testnativex11.c)
+elseif(OS2)
+    add_executable(testnative testnative.c testnativeos2.c)
 endif()
 
 add_executable(testoverlay2 testoverlay2.c testyuv_cvt.c)
