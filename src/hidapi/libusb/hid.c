@@ -394,7 +394,6 @@ static wchar_t *get_usb_string(libusb_device_handle *dev, uint8_t idx)
 	int len;
 	wchar_t *str = NULL;
 
-#if !defined(__OS2__) /* we don't use iconv on OS/2, as we lack functionality */
 	wchar_t wbuf[256];
 	SDL_iconv_t ic;
 	size_t inbytes;
@@ -402,9 +401,6 @@ static wchar_t *get_usb_string(libusb_device_handle *dev, uint8_t idx)
 	size_t res;
 	const char *inptr;
 	char *outptr;
-#else
-	int i;
-#endif
 
 	/* Determine which language to use. */
 	uint16_t lang;
@@ -421,22 +417,6 @@ static wchar_t *get_usb_string(libusb_device_handle *dev, uint8_t idx)
 	if (len < 0)
 		return NULL;
 
-#if defined(__OS2__)
-	/* Bionic does not have wchar_t iconv support, so it
-	   has to be done manually.  The following code will only work for
-	   code points that can be represented as a single UTF-16 character,
-	   and will incorrectly convert any code points which require more
-	   than one UTF-16 character.
-
-	   Skip over the first character (2-bytes).  */
-	len -= 2;
-	str = (wchar_t*) malloc((len / 2 + 1) * sizeof(wchar_t));
-	for (i = 0; i < len / 2; i++) {
-		str[i] = buf[i * 2 + 2] | (buf[i * 2 + 3] << 8);
-	}
-	str[len / 2] = 0x00000000;
-
-#else
 	/* buf does not need to be explicitly NULL-terminated because
 	   it is only passed into iconv() which does not need it. */
 
@@ -469,7 +449,6 @@ static wchar_t *get_usb_string(libusb_device_handle *dev, uint8_t idx)
 
 err:
 	SDL_iconv_close(ic);
-#endif
 
 	return str;
 }
