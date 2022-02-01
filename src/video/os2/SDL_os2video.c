@@ -1399,19 +1399,11 @@ static char *OS2_GetClipboardText(_THIS)
 
 static SDL_bool OS2_HasClipboardText(_THIS)
 {
-    SDL_VideoData *pVData = (SDL_VideoData *)_this->driverdata;
-    SDL_bool   fClipboard;
+    char *text = OS2_GetClipboardText(_this);
+    if (text && text[0] != '\0')
+        return SDL_TRUE;
 
-    if (!WinOpenClipbrd(pVData->hab)) {
-        debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed");
-        return SDL_FALSE;
-    }
-
-    fClipboard = ((PSZ)WinQueryClipbrdData(pVData->hab, CF_TEXT) != NULL)?
-                   SDL_TRUE : SDL_FALSE;
-    WinCloseClipbrd(pVData->hab);
-
-    return fClipboard;
+    return SDL_FALSE;
 }
 
 
