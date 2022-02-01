@@ -327,7 +327,7 @@ static VOID _wmChar(WINDATA *pWinData, MPARAM mp1, MPARAM mp2)
         acUTF8 = OS2_SysToUTF8((char *)&ulCharCode);
 
 //      SDL_SendKeyboardText((lRC > 0)? acUTF8 : (PSZ)&ulCharCode);
-        SDL_SendKeyboardText((acUTF8 != NULL && SDL_strlen(acUTF8) > 0)? &acUTF8 : &ulCharCode);
+        SDL_SendKeyboardText((acUTF8 != NULL && SDL_strlen(acUTF8) > 0)? (char *)&acUTF8 : (char *)&ulCharCode);
     }
 }
 
@@ -911,6 +911,8 @@ static void OS2_DestroyWindow(_THIS, SDL_Window * window)
     debug(SDL_LOG_CATEGORY_VIDEO, "Enter" );
     if (pWinData == NULL)
         return;
+
+
 
     if (pWinData->fnUserWndProc == NULL) {
         /* Window was created by SDL (OS2_CreateWindow()),
