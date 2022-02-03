@@ -279,6 +279,9 @@ video_createWindowVariousFlags(void *arg)
       break;
      case 2:
       flags = SDL_WINDOW_OPENGL;
+#ifndef SDL_VIDEO_OPENGL
+      continue;
+#endif
       break;
      case 3:
       flags = SDL_WINDOW_SHOWN;
