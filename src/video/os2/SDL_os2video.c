@@ -258,7 +258,7 @@ static VOID _wmMouseMove(WINDATA *pWinData, SHORT lX, SHORT lY)
         }
 
         SDL_SendMouseMotion(pWinData->window, 0, 0, lX,
-                            pWinData->window->h - lY - 1);
+                            pWinData->window->h - lY);
         return;
     }
 
