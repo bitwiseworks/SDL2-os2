@@ -46,6 +46,13 @@ void lockDecr(volatile int *piVal);
   parm [eax];
 */
 
+typedef struct {
+    ULONG ulSysDeviceIndex;
+    ULONG ulSDLDeviceIndex;
+} DeviceHandle;
+
+static unsigned int uDefaultDeviceIndex = 1; // As default device, we select the first one.
+
 static ULONG _getEnvULong(const char *name, ULONG ulMax, ULONG ulDefault)
 {
     ULONG   ulValue;
@@ -118,14 +125,29 @@ static LONG APIENTRY cbAudioReadEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
 
 static void OS2_DetectDevices(void)
 {
-    MCI_SYSINFO_PARMS       stMCISysInfo;
-    CHAR                    acBuf[256];
-    ULONG                   ulDevicesNum;
-    MCI_SYSINFO_LOGDEVICE   stLogDevice;
-    MCI_SYSINFO_PARMS       stSysInfoParams;
-    ULONG                   ulRC;
-    ULONG                   ulHandle = 0;
+    MCI_SYSINFO_PARMS         stMCISysInfo;
+    CHAR                      acBuf[256];
+    ULONG                     ulDevicesNum;
+    MCI_SYSINFO_LOGDEVICE     stLogDevice;
+    MCI_SYSINFO_PARMS         stSysInfoParams;
+    ULONG                     ulRC;
+    ULONG                     ulHandle = 0;
+    DeviceHandle              *pHandle;
+    MCI_SYSINFO_DEFAULTDEVICE defDevice;
+    BOOL                      checkDefault;
 
+
+    SDL_memset(&stMCISysInfo, 0, sizeof(stMCISysInfo));
+    stMCISysInfo.pszReturn     = acBuf;
+    stMCISysInfo.ulRetSize     = sizeof(acBuf)-1;
+    stMCISysInfo.ulItem        = MCI_SYSINFO_QUERY_DEFAULT;
+    stMCISysInfo.pSysInfoParm  = &defDevice;
+    memset(&defDevice,0,sizeof(defDevice));
+    defDevice.usDeviceType = MCI_DEVTYPE_AUDIO_AMPMIX;
+    ulRC = mciSendCommand(0, MCI_SYSINFO, MCI_SYSINFO_ITEM | MCI_WAIT,&stMCISysInfo,0);
+    checkDefault = ulRC == NO_ERROR;
+
+    SDL_memset(&stMCISysInfo, 0, sizeof(stMCISysInfo));
     acBuf[0] = '\0';
     stMCISysInfo.pszReturn    = acBuf;
     stMCISysInfo.ulRetSize    = sizeof(acBuf);
@@ -139,7 +161,7 @@ static void OS2_DetectDevices(void)
 
     ulDevicesNum = SDL_strtoul(stMCISysInfo.pszReturn, NULL, 10);
 
-    for (stSysInfoParams.ulNumber = 0; stSysInfoParams.ulNumber < ulDevicesNum;
+    for (stSysInfoParams.ulNumber = 1; stSysInfoParams.ulNumber <= ulDevicesNum;
          stSysInfoParams.ulNumber++) {
         /* Get device install name. */
         stSysInfoParams.pszReturn    = acBuf;
@@ -162,14 +184,25 @@ static void OS2_DetectDevices(void)
             debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_ITEM - failed, rc = 0x%X", ulRC);
             continue;
         }
+printf("default %s; device %s\n", defDevice.szInstallName, stLogDevice.szInstallName);
+        if (checkDefault && 0 == SDL_strcmp(defDevice.szInstallName, stLogDevice.szInstallName)) {
+            uDefaultDeviceIndex = stSysInfoParams.ulNumber;
+        }
 
         ulHandle++;
-        SDL_AddAudioDevice(0, stLogDevice.szProductInfo, NULL, (void *)(ulHandle));
+        pHandle = SDL_malloc(sizeof(DeviceHandle));
+        pHandle->ulSysDeviceIndex = stSysInfoParams.ulNumber;
+        pHandle->ulSDLDeviceIndex = ulHandle;
+        SDL_AddAudioDevice(0, stLogDevice.szProductInfo, NULL, (void *)pHandle);
 #if OS2_HasCapture
         ulHandle++;
-        SDL_AddAudioDevice(1, stLogDevice.szProductInfo, NULL, (void *)(ulHandle));
+        pHandle = SDL_malloc(sizeof(DeviceHandle));
+        pHandle->ulSysDeviceIndex = stSysInfoParams.ulNumber;
+        pHandle->ulSDLDeviceIndex = ulHandle;
+        SDL_AddAudioDevice(1, stLogDevice.szProductInfo, NULL, (void *)pHandle);
 #endif
     }
+printf("Default %d\n", uDefaultDeviceIndex);
 }
 
 static void OS2_WaitDevice(_THIS)
@@ -264,6 +297,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
     ULONG                 ulRC;
     ULONG                 ulIdx;
     BOOL                  new_freq;
+    DeviceHandle          *pHandle = (DeviceHandle*)handle;
 
     new_freq = FALSE;
     SDL_zero(stMCIAmpOpen);
@@ -291,8 +325,10 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
     }
 
     /* Open audio device */
-    stMCIAmpOpen.usDeviceID = (handle != NULL) ? ((ULONG)handle - 1) : 0;
-    stMCIAmpOpen.pszDeviceType = (PSZ)MCI_DEVTYPE_AUDIO_AMPMIX;
+    stMCIAmpOpen.usDeviceID = 0;
+    stMCIAmpOpen.pszDeviceType = (PSZ)MAKEULONG(MCI_DEVTYPE_AUDIO_AMPMIX, 
+        pHandle != NULL ? pHandle->ulSysDeviceIndex : uDefaultDeviceIndex);
+
     ulRC = mciSendCommand(0, MCI_OPEN,
                           (_getEnvULong("SDL_AUDIO_SHARE", 1, 0) != 0)?
                            MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE :
