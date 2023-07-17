@@ -204,6 +204,8 @@ static void OS2_WaitDevice(_THIS)
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
     ULONG   ulRC;
 
+    debug(SDL_LOG_CATEGORY_AUDIO,"");
+
     /* Wait for an audio chunk to finish */
     ulRC = DosWaitEventSem(pAData->hevBuf, 5000);
     if (ulRC != NO_ERROR) {
@@ -214,6 +216,9 @@ static void OS2_WaitDevice(_THIS)
 static Uint8 *OS2_GetDeviceBuf(_THIS)
 {
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
+
+    debug(SDL_LOG_CATEGORY_AUDIO,"");
+
     return (Uint8 *) pAData->pYourBuffer->pBuffer;
 }
 
@@ -222,6 +227,8 @@ static void OS2_PlayDevice(_THIS)
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
     ULONG                 ulRC;
     PMCI_MIX_BUFFER       pMixBuffer = pAData->pYourBuffer;
+
+    debug(SDL_LOG_CATEGORY_AUDIO,"");
 
     ulRC = pAData->stMCIMixSetup.pmixWrite(pAData->stMCIMixSetup.ulMixHandle,
                                            pMixBuffer, 1);
@@ -239,7 +246,15 @@ static int OS2_CaptureFromDevice(_THIS,void *buffer,int buflen)
     PMCI_MIX_BUFFER       pMixBuffer = pAData->pYourBuffer;
     int                   len = SDL_min((int)pMixBuffer->ulBufferLength,buflen);
 
-    pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle, _getNextBuffer(pAData,pAData->pYourBuffer), 1);
+    debug(SDL_LOG_CATEGORY_AUDIO,"buflen = %u, ulBufferLength = %lu",buflen,pMixBuffer->ulBufferLength);
+
+    /* pass Read buffers to kick off the amp mixer */
+    ulRC = pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle,
+                                          pMixBuffer, 1);
+    if (ulRC != MCIERR_SUCCESS) {
+        _mixIOError("pmixRead", ulRC);
+        return -1;
+    }
 
     /* Wait for an audio chunk to finish */
     ulRC = DosWaitEventSem(pAData->hevBuf, 5000);
@@ -249,9 +264,9 @@ static int OS2_CaptureFromDevice(_THIS,void *buffer,int buflen)
         return -1;
     }
 
+    pMixBuffer = pAData->pYourBuffer;
     SDL_memcpy(buffer,pMixBuffer->pBuffer,len);
-
-    debug(SDL_LOG_CATEGORY_AUDIO,"buflen = %u, ulBufferLength = %lu",buflen,pMixBuffer->ulBufferLength);
+    pAData->pYourBuffer = _getNextBuffer(pAData,pMixBuffer);
 
     return len;
 }
@@ -260,6 +275,9 @@ static void OS2_FlushCapture(_THIS)
 {
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
     ULONG                 ulIdx;
+
+    debug(SDL_LOG_CATEGORY_AUDIO,"");
+
     /* Fill all device buffers with data */
     for (ulIdx = 0; ulIdx < pAData->cMixBuffers; ulIdx++) {
         pAData->aMixBuffers[ulIdx].ulFlags        = 0;
@@ -504,16 +522,6 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
 
         if (ulRC != MCIERR_SUCCESS) {
             _mixIOError("pmixWrite", ulRC);
-            return -1;
-        }
-    }
-    else
-    {
-        /* pass Read buffers to kick off the amp mixer */
-        ulRC = pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle,
-                                              pAData->aMixBuffers, 1);
-        if (ulRC != MCIERR_SUCCESS) {
-            _mixIOError("pmixRead", ulRC);
             return -1;
         }
     }
