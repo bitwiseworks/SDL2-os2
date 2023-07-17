@@ -30,21 +30,12 @@
 #include "../SDL_audio_c.h"
 #include "SDL_os2audio.h"
 
-/* no capture devices so far, so need to init them
- * as soon as we have it, enable set OS2_HasCapture to 1 or remove the if */
-#define OS2_HasCapture 0
-
-/*
-void lockIncr(volatile int *piVal);
-#pragma aux lockIncr = \
-  "lock add [eax], 1 "\
-  parm [eax];
-
-void lockDecr(volatile int *piVal);
-#pragma aux lockDecr = \
-  "lock sub [eax], 1 "\
-  parm [eax];
-*/
+static PMCI_MIX_BUFFER _getNextBuffer(SDL_PrivateAudioData *pAData, PMCI_MIX_BUFFER pBuffer)
+{
+    PMCI_MIX_BUFFER pFirstBuffer = &pAData->aMixBuffers[0];
+    PMCI_MIX_BUFFER pLastBuffer = &pAData->aMixBuffers[pAData->cMixBuffers -1];
+    return (pBuffer == pLastBuffer ? pFirstBuffer : pBuffer+1);
+}
 
 static ULONG _getEnvULong(const char *name, ULONG ulMax, ULONG ulDefault)
 {
@@ -68,7 +59,7 @@ static int _MCIError(const char *func, ULONG ulResult)
 
 static void _mixIOError(const char *function, ULONG ulRC)
 {
-    debug(SDL_LOG_CATEGORY_AUDIO, "%s() - failed, rc = 0x%X (%s)",
+    debug(SDL_LOG_CATEGORY_AUDIO, "%s() - failed, rc = 0x%lX (%s)",
               function, ulRC,
               (ulRC == MCIERR_INVALID_MODE)   ? "Mixer mode does not match request" :
               (ulRC == MCIERR_INVALID_BUFFER) ? "Caller sent an invalid buffer"     : "unknown");
@@ -80,15 +71,16 @@ static LONG APIENTRY cbAudioWriteEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)pBuffer->ulUserParm;
     ULONG   ulRC;
 
+    debug(SDL_LOG_CATEGORY_AUDIO,"cbAudioWriteEvent: ulStatus = %lu, pBuffer = %p, ulFlags = %#lX",ulStatus,pBuffer,ulFlags);
+
     if (ulFlags != MIX_WRITE_COMPLETE) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%X", ulFlags);
+        debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%lX", ulFlags);
         return 0;
     }
 
-    /*lockDecr((int *)&pAData->ulQueuedBuf);*/
     ulRC = DosPostEventSem(pAData->hevBuf);
     if (ulRC != NO_ERROR && ulRC != ERROR_ALREADY_POSTED) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %u", ulRC);
+        debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %lu", ulRC);
     }
 
     return 1; /* return value doesn't seem to matter. */
@@ -100,16 +92,18 @@ static LONG APIENTRY cbAudioReadEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)pBuffer->ulUserParm;
     ULONG   ulRC;
 
+    debug(SDL_LOG_CATEGORY_AUDIO,"cbAudioReadEvent: ulStatus = %lu, pBuffer = %p, ulFlags = %#lX",ulStatus,pBuffer,ulFlags);
+
     if (ulFlags != MIX_READ_COMPLETE) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%X", ulFlags);
+        debug(SDL_LOG_CATEGORY_AUDIO, "flags = 0x%lX", ulFlags);
         return 0;
     }
 
-    pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle, pBuffer, 1);
+    pAData->pYourBuffer = pBuffer;
 
     ulRC = DosPostEventSem(pAData->hevBuf);
     if (ulRC != NO_ERROR && ulRC != ERROR_ALREADY_POSTED) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %u", ulRC);
+        debug(SDL_LOG_CATEGORY_AUDIO, "DosPostEventSem(), rc = %lu", ulRC);
     }
 
     return 1;
@@ -125,11 +119,9 @@ static void OS2_DetectDevices(void)
     MCI_SYSINFO_PARMS         stSysInfoParams;
     ULONG                     ulRC;
     ULONG                     ulNumber;
-#if OS2_HasCapture
     MCI_GETDEVCAPS_PARMS      stDevCapsParams;
     MCI_OPEN_PARMS            stMCIOpen;
     MCI_GENERIC_PARMS         stMCIGenericParams;
-#endif
 
     SDL_memset(&stMCISysInfo, 0, sizeof(stMCISysInfo));
     acBuf[0] = '\0';
@@ -166,13 +158,12 @@ static void OS2_DetectDevices(void)
         ulRC = mciSendCommand(0, MCI_SYSINFO, MCI_WAIT | MCI_SYSINFO_ITEM,
                               &stSysInfoParams, 0);
         if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
-            debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_ITEM - failed, rc = 0x%hX", LOUSHORT(rc));
+            debug(SDL_LOG_CATEGORY_AUDIO, "MCI_SYSINFO, MCI_SYSINFO_ITEM - failed, rc = 0x%hX", LOUSHORT(ulRC));
             continue;
         }
 
         SDL_AddAudioDevice(0, stLogDevice.szProductInfo, NULL, (void *)ulNumber);
 
-#if OS2_HasCapture
         /* Open audio device for querying its capabilities */
         /* at this point we HAVE TO OPEN the waveaudio device and not the ampmix device */
         /* because only the waveaudio device (tied to the ampmix device) supports querying for playback/record capability */
@@ -205,7 +196,6 @@ static void OS2_DetectDevices(void)
         if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
             debug(SDL_LOG_CATEGORY_AUDIO, "MCI_CLOSE (getDevCaps) - failed");
         }
-#endif
     }
 }
 
@@ -217,32 +207,71 @@ static void OS2_WaitDevice(_THIS)
     /* Wait for an audio chunk to finish */
     ulRC = DosWaitEventSem(pAData->hevBuf, 5000);
     if (ulRC != NO_ERROR) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "DosWaitEventSem(), rc = %u", ulRC);
+        debug(SDL_LOG_CATEGORY_AUDIO, "DosWaitEventSem(), rc = %lu", ulRC);
     }
 }
 
 static Uint8 *OS2_GetDeviceBuf(_THIS)
 {
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
-    return (Uint8 *) pAData->aMixBuffers[pAData->ulNextBuf].pBuffer;
+    return (Uint8 *) pAData->pYourBuffer->pBuffer;
 }
 
 static void OS2_PlayDevice(_THIS)
 {
     SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
     ULONG                 ulRC;
-    PMCI_MIX_BUFFER       pMixBuffer = &pAData->aMixBuffers[pAData->ulNextBuf];
+    PMCI_MIX_BUFFER       pMixBuffer = pAData->pYourBuffer;
 
-    /* Queue it up */
-    /*lockIncr((int *)&pAData->ulQueuedBuf);*/
     ulRC = pAData->stMCIMixSetup.pmixWrite(pAData->stMCIMixSetup.ulMixHandle,
                                            pMixBuffer, 1);
     if (ulRC != MCIERR_SUCCESS) {
         _mixIOError("pmixWrite", ulRC);
     } else {
-        pAData->ulNextBuf = (pAData->ulNextBuf + 1) % pAData->cMixBuffers;
+        pAData->pYourBuffer = _getNextBuffer(pAData,pMixBuffer);
     }
 }
+
+static int OS2_CaptureFromDevice(_THIS,void *buffer,int buflen)
+{
+    SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
+    ULONG                 ulRC;
+    PMCI_MIX_BUFFER       pMixBuffer = pAData->pYourBuffer;
+    int                   len = SDL_min((int)pMixBuffer->ulBufferLength,buflen);
+
+    pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle, _getNextBuffer(pAData,pAData->pYourBuffer), 1);
+
+    /* Wait for an audio chunk to finish */
+    ulRC = DosWaitEventSem(pAData->hevBuf, 5000);
+    if (ulRC != NO_ERROR)
+    {
+        debug(SDL_LOG_CATEGORY_AUDIO, "DosWaitEventSem(), rc = %lu", ulRC);
+        return -1;
+    }
+
+    SDL_memcpy(buffer,pMixBuffer->pBuffer,len);
+
+    debug(SDL_LOG_CATEGORY_AUDIO,"buflen = %u, ulBufferLength = %lu",buflen,pMixBuffer->ulBufferLength);
+
+    return len;
+}
+
+static void OS2_FlushCapture(_THIS)
+{
+    SDL_PrivateAudioData *pAData = (SDL_PrivateAudioData *)_this->hidden;
+    ULONG                 ulIdx;
+    /* Fill all device buffers with data */
+    for (ulIdx = 0; ulIdx < pAData->cMixBuffers; ulIdx++) {
+        pAData->aMixBuffers[ulIdx].ulFlags        = 0;
+        pAData->aMixBuffers[ulIdx].ulBufferLength = _this->spec.size;
+        pAData->aMixBuffers[ulIdx].ulUserParm     = (ULONG)pAData;
+
+        SDL_memset(((PMCI_MIX_BUFFER)pAData->aMixBuffers)[ulIdx].pBuffer,
+                   _this->spec.silence, _this->spec.size);
+    }
+    pAData->pYourBuffer = pAData->aMixBuffers;
+}
+
 
 static void OS2_CloseDevice(_THIS)
 {
@@ -255,11 +284,20 @@ static void OS2_CloseDevice(_THIS)
 
     /* Close up audio */
     if (pAData->usDeviceId != (USHORT)~0) { /* Device is open. */
+            SDL_zero(sMCIGenericParms);
+
+            ulRC = mciSendCommand(pAData->usDeviceId, MCI_STOP,
+                                  MCI_WAIT,
+                                  &sMCIGenericParms, 0);
+            if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
+                debug(SDL_LOG_CATEGORY_AUDIO, "MCI_STOP - failed" );
+            }
+
         if (pAData->stMCIMixSetup.ulBitsPerSample != 0) { /* Mixer was initialized. */
             ulRC = mciSendCommand(pAData->usDeviceId, MCI_MIXSETUP,
                                   MCI_WAIT | MCI_MIXSETUP_DEINIT,
                                   &pAData->stMCIMixSetup, 0);
-            if (ulRC != MCIERR_SUCCESS) {
+            if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
                 debug(SDL_LOG_CATEGORY_AUDIO, "MCI_MIXSETUP, MCI_MIXSETUP_DEINIT - failed" );
             }
         }
@@ -273,14 +311,14 @@ static void OS2_CloseDevice(_THIS)
 
             ulRC = mciSendCommand(pAData->usDeviceId, MCI_BUFFER,
                                   MCI_WAIT | MCI_DEALLOCATE_MEMORY, &stMCIBuffer, 0);
-            if (ulRC != MCIERR_SUCCESS) {
+            if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
                 debug(SDL_LOG_CATEGORY_AUDIO, "MCI_BUFFER, MCI_DEALLOCATE_MEMORY - failed");
             }
         }
 
         ulRC = mciSendCommand(pAData->usDeviceId, MCI_CLOSE, MCI_WAIT,
                               &sMCIGenericParms, 0);
-        if (ulRC != MCIERR_SUCCESS) {
+        if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
             debug(SDL_LOG_CATEGORY_AUDIO, "MCI_CLOSE - failed");
         }
     }
@@ -324,7 +362,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
 
     ulRC = DosCreateEventSem(NULL, &pAData->hevBuf, DCE_AUTORESET, TRUE);
     if (ulRC != NO_ERROR) {
-        debug(SDL_LOG_CATEGORY_AUDIO, "DosCreateEventSem() failed, rc = %u", ulRC);
+        debug(SDL_LOG_CATEGORY_AUDIO, "DosCreateEventSem() failed, rc = %lu", ulRC);
         return -1;
     }
 
@@ -336,7 +374,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
                            MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE :
                            MCI_WAIT | MCI_OPEN_TYPE_ID,
                           &stMCIAmpOpen,  0);
-    if (ulRC != MCIERR_SUCCESS) {
+    if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
         pAData->usDeviceId = (USHORT)~0;
         return _MCIError("MCI_OPEN", ulRC);
     }
@@ -400,7 +438,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
 
     ulRC = mciSendCommand(pAData->usDeviceId, MCI_MIXSETUP,
                           MCI_WAIT | MCI_MIXSETUP_INIT, &pAData->stMCIMixSetup, 0);
-    if (ulRC != MCIERR_SUCCESS && _this->spec.freq > 44100) {
+    if (LOUSHORT(ulRC) != MCIERR_SUCCESS && _this->spec.freq > 44100) {
         new_freq = TRUE;
         pAData->stMCIMixSetup.ulSamplesPerSec = 44100;
         _this->spec.freq = 44100;
@@ -408,7 +446,7 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
                               MCI_WAIT | MCI_MIXSETUP_INIT, &pAData->stMCIMixSetup, 0);
     }
 
-    debug(SDL_LOG_CATEGORY_AUDIO, "Setup mixer [BPS: %u, Freq.: %u, Channels: %u]: %s",
+    debug(SDL_LOG_CATEGORY_AUDIO, "Setup mixer [BPS: %lu, Freq.: %lu, Channels: %lu]: %s",
               pAData->stMCIMixSetup.ulBitsPerSample,
               pAData->stMCIMixSetup.ulSamplesPerSec,
               pAData->stMCIMixSetup.ulChannels,
@@ -439,11 +477,13 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
 
     ulRC = mciSendCommand(pAData->usDeviceId, MCI_BUFFER,
                           MCI_WAIT | MCI_ALLOCATE_MEMORY, &stMCIBuffer, 0);
-    if (ulRC != MCIERR_SUCCESS) {
+    if (LOUSHORT(ulRC) != MCIERR_SUCCESS) {
         return _MCIError("MCI_BUFFER", ulRC);
     }
     pAData->cMixBuffers = stMCIBuffer.ulNumBuffers;
     _this->spec.size = stMCIBuffer.ulBufferSize;
+
+    debug(SDL_LOG_CATEGORY_AUDIO,"%s, number of mix buffers: %lu",iscapture ? "capture": "play",pAData->cMixBuffers);
 
     /* Fill all device buffers with data */
     for (ulIdx = 0; ulIdx < stMCIBuffer.ulNumBuffers; ulIdx++) {
@@ -454,13 +494,28 @@ static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
         SDL_memset(((PMCI_MIX_BUFFER)stMCIBuffer.pBufList)[ulIdx].pBuffer,
                    _this->spec.silence, stMCIBuffer.ulBufferSize);
     }
+    pAData->pYourBuffer = pAData->aMixBuffers;
 
-    /* Write buffers to kick off the amp mixer */
-    ulRC = pAData->stMCIMixSetup.pmixWrite(pAData->stMCIMixSetup.ulMixHandle,
-                                           pAData->aMixBuffers, 1);
-    if (ulRC != MCIERR_SUCCESS) {
-        _mixIOError("pmixWrite", ulRC);
-        return -1;
+    if (iscapture == 0)
+    {
+        /* Write buffers to kick off the amp mixer */
+        ulRC = pAData->stMCIMixSetup.pmixWrite(pAData->stMCIMixSetup.ulMixHandle,
+                                               pAData->aMixBuffers, 1);
+
+        if (ulRC != MCIERR_SUCCESS) {
+            _mixIOError("pmixWrite", ulRC);
+            return -1;
+        }
+    }
+    else
+    {
+        /* pass Read buffers to kick off the amp mixer */
+        ulRC = pAData->stMCIMixSetup.pmixRead(pAData->stMCIMixSetup.ulMixHandle,
+                                              pAData->aMixBuffers, 1);
+        if (ulRC != MCIERR_SUCCESS) {
+            _mixIOError("pmixRead", ulRC);
+            return -1;
+        }
     }
 
     return 0;
@@ -476,13 +531,9 @@ static int OS2_Init(SDL_AudioDriverImpl * impl)
     impl->WaitDevice    = OS2_WaitDevice;
     impl->GetDeviceBuf  = OS2_GetDeviceBuf;
     impl->CloseDevice   = OS2_CloseDevice;
-
-#if OS2_HasCapture
-    /* TODO: IMPLEMENT CAPTURE SUPPORT: */
-    impl->CaptureFromDevice = ;
-    impl->FlushCapture = ;
+    impl->CaptureFromDevice = OS2_CaptureFromDevice ;
+    impl->FlushCapture = OS2_FlushCapture;
     impl->HasCaptureSupport = SDL_TRUE;
-#endif
 
     return 1; /* this audio target is available. */
 }
