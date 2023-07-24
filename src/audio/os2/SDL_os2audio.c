@@ -292,7 +292,7 @@ static int OS2_CaptureFromDevice(_THIS,void *buffer,int buflen)
     ULONG                 ulRC;
     PMCI_MIX_BUFFER       pMixBuffer = NULL;
     int                   len = 0;
-printf("Capture\n");
+
     if (!pAData->ulState)
     {
         pAData->ulState = 1;
