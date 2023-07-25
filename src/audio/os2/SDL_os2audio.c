@@ -400,7 +400,7 @@ static void OS2_CloseDevice(_THIS)
     if (pAData->hevBuf != NULLHANDLE)
         DosCloseEventSem(pAData->hevBuf);
 
-    free(pAData);
+    SDL_free(pAData);
 }
 
 static int OS2_OpenDevice(_THIS, void *handle, const char *devname,
