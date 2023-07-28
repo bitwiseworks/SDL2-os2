@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2021 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2023 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -35,8 +35,8 @@
 #define IDD_PB_FIRST        1003
 
 typedef struct _MSGBOXDLGDATA {
-    USHORT       cb;
-    HWND         hwndUnder;
+    USHORT      cb;
+    HWND        hwndUnder;
 } MSGBOXDLGDATA;
 
 static VOID _wmInitDlg(HWND hwnd, MSGBOXDLGDATA *pDlgData)
@@ -377,8 +377,8 @@ static HWND _makeDlg(const SDL_MessageBoxData *messageboxdata)
 
     pDlgItem->cchText = 3; /* 0xFF, low byte of the icon Id, high byte of icon Id. */
     pDlgItem->offText = pcDlgData - (PCHAR)pTemplate;   /* Offset to the Id. */
-    /* Write susyem icon ID into dialog template. */
-    *pcDlgData = 0xFF; /* First byte is 0xFF - next 2 bytes is system pointer Id. */
+    /* Write system icon ID into dialog template. */
+    *((PBYTE)pcDlgData) = 0xFF; /* First byte is 0xFF, next 2 are system pointer Id. */
     pcDlgData++;
     *((PUSHORT)pcDlgData) = ((messageboxdata->flags & SDL_MESSAGEBOX_ERROR) != 0)?
                               SPTR_ICONERROR :
