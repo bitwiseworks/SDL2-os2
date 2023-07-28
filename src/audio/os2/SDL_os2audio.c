@@ -412,8 +412,8 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     ULONG                 ulRC;
     ULONG                 ulIdx;
     BOOL                  new_freq;
-    ULONG                 ulHandle = (ULONG)handle;
     SDL_bool              iscapture = _this->iscapture;
+    ULONG                 ulHandle = (ULONG)_this->handle;
 
     new_freq = FALSE;
     SDL_zero(stMCIAmpOpen);
