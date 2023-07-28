@@ -1418,7 +1418,7 @@ static SDL_bool OS2_HasClipboardText(_THIS)
     SDL_bool  result;
 
     if (!WinOpenClipbrd(pVData->hab)) {
-        debug_os2("WinOpenClipbrd() failed");
+        debug(SDL_LOG_CATEGORY_VIDEO, "WinOpenClipbrd() failed");
         return SDL_FALSE;
     }
 

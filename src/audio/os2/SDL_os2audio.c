@@ -587,7 +587,7 @@ static SDL_bool OS2_Init(SDL_AudioDriverImpl * impl)
     impl->CaptureFromDevice = OS2_CaptureFromDevice ;
     impl->FlushCapture = OS2_FlushCapture;
     impl->HasCaptureSupport = SDL_TRUE;
-    */
+
     return SDL_TRUE; /* this audio target is available. */
 }
 
