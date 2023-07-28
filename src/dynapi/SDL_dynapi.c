@@ -26,7 +26,7 @@
 
 #define SDL_DYNAMIC_API_ENVVAR "SDL_DYNAMIC_API"
 
-#if defined(__OS2__) && !defined(__LIBCN__)
+#if defined(__OS2__) && !defined(__KLIBC__)
 #define INCL_DOS
 #define INCL_DOSERRORS
 #include <os2.h>

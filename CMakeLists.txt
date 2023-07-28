@@ -2742,6 +2742,7 @@ elseif(OS2)
     file(GLOB OS2_AUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/os2/*.c)
     list(APPEND SOURCE_FILES ${OS2_AUDIO_SOURCES})
     set(HAVE_SDL_AUDIO TRUE)
+    list(APPEND EXTRA_LIBS mmpm2)
   endif()
 
   if(SDL_JOYSTICK)

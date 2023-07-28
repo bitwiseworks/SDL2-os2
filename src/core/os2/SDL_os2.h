@@ -24,6 +24,7 @@
 #include "SDL_log.h"
 #include "SDL_stdinc.h"
 
+#ifndef __LIBCN__
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
 #define debug_os2(s, ...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
@@ -70,6 +71,7 @@ void SDL_OS2Quit(void);
 
 #define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
 #define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
+#define libiconv_clean() do {} while(0)
 #endif
 
 #endif /* SDL_os2_h_ */
