@@ -141,16 +141,16 @@ static LONG APIENTRY cbAudioReadEvent(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer,
 
 static void OS2_DetectDevices(void)
 {
-    MCI_SYSINFO_PARMS         stMCISysInfo;
-    CHAR                      acBuf[256];
-    ULONG                     ulDevicesNum;
-    MCI_SYSINFO_LOGDEVICE     stLogDevice;
-    MCI_SYSINFO_PARMS         stSysInfoParams;
-    ULONG                     ulRC;
-    ULONG                     ulNumber;
-    MCI_GETDEVCAPS_PARMS      stDevCapsParams;
-    MCI_OPEN_PARMS            stMCIOpen;
-    MCI_GENERIC_PARMS         stMCIGenericParams;
+    MCI_SYSINFO_PARMS       stMCISysInfo;
+    CHAR                    acBuf[256];
+    ULONG                   ulDevicesNum;
+    MCI_SYSINFO_LOGDEVICE   stLogDevice;
+    MCI_SYSINFO_PARMS       stSysInfoParams;
+    ULONG                   ulRC;
+    ULONG                   ulNumber;
+    MCI_GETDEVCAPS_PARMS    stDevCapsParams;
+    MCI_OPEN_PARMS          stMCIOpen;
+    MCI_GENERIC_PARMS       stMCIGenericParams;
 
     SDL_memset(&stMCISysInfo, 0, sizeof(stMCISysInfo));
     acBuf[0] = '\0';
