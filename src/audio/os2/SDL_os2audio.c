@@ -412,10 +412,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     ULONG                 ulRC;
     ULONG                 ulIdx;
     BOOL                  new_freq;
-    ULONG                 ulHandle = (ULONG)handle;
-    SDL_bool              iscapture = _this->iscapture;
-
-    new_freq = FALSE;
+    ULONG                 ulHandle = (ULONG)_this->handle;
     SDL_zero(stMCIAmpOpen);
     SDL_zero(stMCIBuffer);
 
@@ -454,7 +451,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     }
     pAData->usDeviceId = stMCIAmpOpen.usDeviceID;
 
-    if (iscapture) {
+    if (_this->iscapture) {
         MCI_CONNECTOR_PARMS stMCIConnector;
         MCI_AMP_SET_PARMS   stMCIAmpSet;
         BOOL                fLineIn = _getEnvULong("SDL_AUDIO_LINEIN", 1, 0);
@@ -502,7 +499,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     pAData->stMCIMixSetup.ulSamplesPerSec = _this->spec.freq;
     pAData->stMCIMixSetup.ulChannels      = _this->spec.channels;
     pAData->stMCIMixSetup.ulDeviceType    = MCI_DEVTYPE_WAVEFORM_AUDIO;
-    if (!iscapture) {
+    if (!_this->iscapture) {
         pAData->stMCIMixSetup.ulFormatMode= MCI_PLAY;
         pAData->stMCIMixSetup.pmixEvent   = cbAudioWriteEvent;
     } else {
@@ -557,7 +554,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     pAData->cMixBuffers = stMCIBuffer.ulNumBuffers;
     _this->spec.size = stMCIBuffer.ulBufferSize;
 
-    debug(SDL_LOG_CATEGORY_AUDIO,"%s, number of mix buffers: %lu",iscapture ? "capture": "play",pAData->cMixBuffers);
+    debug(SDL_LOG_CATEGORY_AUDIO,"%s, number of mix buffers: %lu", _this->iscapture ? "capture": "play",pAData->cMixBuffers);
 
     /* Fill all device buffers with data */
     for (ulIdx = 0; ulIdx < stMCIBuffer.ulNumBuffers; ulIdx++) {

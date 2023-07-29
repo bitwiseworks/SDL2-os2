@@ -27,27 +27,27 @@
 #ifndef __LIBCN__
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
-#define debug_os2(s, ...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
+# define debug_os2(s,...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
                                  __func__ "(): " ##s,      ##__VA_ARGS__)
 #else
-#define debug_os2(s, ...) printf(__func__ "(): " ##s "\n", ##__VA_ARGS__)
+# define debug_os2(s,...) printf(__func__ "(): " ##s "\n", ##__VA_ARGS__)
 #endif
 
 #else /* no debug */
 
-#define debug_os2(s,...) do {} while (0)
+# define debug_os2(s,...) do {} while (0)
 
 #endif /* OS2DEBUG */
 
 #if defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
-#define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
-#define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
-#define libiconv_clean() do {} while(0)
+# define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
+# define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
+# define libiconv_clean() do {} while(0)
 #else
 /* StrUTF8New() - geniconv/sys2utf8.c */
 #include "geniconv/geniconv.h"
-#define OS2_SysToUTF8(S) StrUTF8New(1,         (S), SDL_strlen((S)) + 1)
-#define OS2_UTF8ToSys(S) StrUTF8New(0, (char *)(S), SDL_strlen((S)) + 1)
+# define OS2_SysToUTF8(S) StrUTF8New(1,         (S), SDL_strlen((S)) + 1)
+# define OS2_UTF8ToSys(S) StrUTF8New(0, (char *)(S), SDL_strlen((S)) + 1)
 #endif
 
 /* SDL_OS2Quit() will be called from SDL_QuitSubSystem() */
@@ -56,10 +56,10 @@ void SDL_OS2Quit(void);
 #else
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
-#define debug(category, s, ...) SDL_LogDebug( category, \
+# define debug(category, s, ...) SDL_LogDebug( category, \
                                        "%s(): "s, __func__, ##__VA_ARGS__)
 #else
-#define debug(category, s, ...) printf("%s(): category: %i message: "s"\n", \
+# define debug(category, s, ...) printf("%s(): category: %i message: "s"\n", \
                                         __func__, category, ##__VA_ARGS__)
 #endif
 
@@ -69,9 +69,9 @@ void SDL_OS2Quit(void);
 
 #endif /* OS2DEBUG */
 
-#define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
-#define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
-#define libiconv_clean() do {} while(0)
+# define OS2_SysToUTF8(S) SDL_iconv_string("UTF-8", "", (char *)(S), SDL_strlen(S)+1)
+# define OS2_UTF8ToSys(S) SDL_iconv_string("", "UTF-8", (char *)(S), SDL_strlen(S)+1)
+# define libiconv_clean() do {} while(0)
 #endif
 
 #endif /* SDL_os2_h_ */
