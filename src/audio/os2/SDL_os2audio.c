@@ -502,7 +502,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     pAData->stMCIMixSetup.ulSamplesPerSec = _this->spec.freq;
     pAData->stMCIMixSetup.ulChannels      = _this->spec.channels;
     pAData->stMCIMixSetup.ulDeviceType    = MCI_DEVTYPE_WAVEFORM_AUDIO;
-    if (!_this->iscapture) {
+    if (!iscapture) {
         pAData->stMCIMixSetup.ulFormatMode= MCI_PLAY;
         pAData->stMCIMixSetup.pmixEvent   = cbAudioWriteEvent;
     } else {
