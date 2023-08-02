@@ -2791,7 +2791,7 @@ elseif(OS2)
     list(APPEND SOURCE_FILES ${OS2_JOYSTICK_SOURCES})
     set(HAVE_SDL_JOYSTICK TRUE)
   endif()
-
+ 
   if(SDL_HIDAPI)
     CheckHIDAPI()
   endif()
