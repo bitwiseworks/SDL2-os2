@@ -118,7 +118,7 @@ set(LT_REVISION "${SDL_INTERFACE_AGE}")
 set(LT_RELEASE "2.0")
 set(LT_VERSION "${LT_MAJOR}.${LT_AGE}.${LT_REVISION}")
 if (OS2)
-  set(OS2_RELEASE "${SDL_MAJOR_VERSION}${SDL_MINOR_VERSION}")
+  set(OS2_RELEASE "${SDL_MAJOR_VERSION}00")
 endif()
 
 # The following should match the versions in the Xcode project file.
@@ -2730,11 +2730,31 @@ elseif(OS2)
     list(APPEND SOURCE_FILES ${CORE_SOURCES})
   endif()
 
-  if(SDL_CLOCK_GETTIME)
-    check_library_exists(c clock_gettime "" FOUND_CLOCK_GETTIME)
-    if(FOUND_CLOCK_GETTIME)
-      set(HAVE_CLOCK_GETTIME 1)
-    endif()
+  if(SDL_TIMERS)
+    set(SDL_TIMER_UNIX 1)
+    file(GLOB OS2_TIMER_SOURCES ${SDL2_SOURCE_DIR}/src/timer/unix/*.c)
+    list(APPEND SOURCE_FILES ${OS2_TIMER_SOURCES})
+    set(HAVE_SDL_TIMERS TRUE)
+  endif()
+
+  if(SDL_FILESYSTEM)
+    set(SDL_FILESYSTEM_OS2 1)
+    file(GLOB FILESYSTEM_SOURCES ${SDL2_SOURCE_DIR}/src/filesystem/os2/*.c)
+    list(APPEND SOURCE_FILES ${FILESYSTEM_SOURCES})
+    set(HAVE_SDL_FILESYSTEM TRUE)
+  endif()
+
+  if(SDL_LOCALE)
+    file(GLOB LOCALE_SOURCES ${SDL2_SOURCE_DIR}/src/locale/unix/*.c)
+    list(APPEND SOURCE_FILES ${LOCALE_SOURCES})
+    set(HAVE_SDL_LOCALE TRUE)
+  endif()
+
+  if(SDL_VIDEO)
+    set(SDL_VIDEO_DRIVER_OS2 1)
+    file(GLOB OS2_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/os2/*.c)
+    list(APPEND SOURCE_FILES ${OS2_VIDEO_SOURCES})
+    set(HAVE_SDL_VIDEO TRUE)
   endif()
 
   if(SDL_TIMERS)
@@ -2772,18 +2792,18 @@ elseif(OS2)
     set(HAVE_SDL_JOYSTICK TRUE)
   endif()
 
-  if(SDL_VIDEO)
-    set(SDL_VIDEO_DRIVER_OS2 1)
-    file(GLOB OS2_VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/os2/*.c)
-    list(APPEND SOURCE_FILES ${OS2_VIDEO_SOURCES})
-    set(HAVE_SDL_VIDEO TRUE)
-  endif()
-
-  CheckPTHREAD()
-
   if(SDL_HIDAPI)
     CheckHIDAPI()
   endif()
+
+  if(SDL_CLOCK_GETTIME)
+    check_library_exists(c clock_gettime "" FOUND_CLOCK_GETTIME)
+    if(FOUND_CLOCK_GETTIME)
+      set(HAVE_CLOCK_GETTIME 1)
+    endif()
+  endif()
+
+  CheckPTHREAD()
 
 elseif(N3DS)
   file(GLOB N3DS_MAIN_SOURCES ${SDL2_SOURCE_DIR}/src/main/n3ds/*.c)
@@ -3360,8 +3380,6 @@ if(SDL_SHARED)
       OUTPUT_NAME "SDL2-${LT_RELEASE}")
   elseif(OS2)
     set_target_properties(SDL2 PROPERTIES
-      VERSION ${LT_VERSION}
-      SOVERSION ${LT_MAJOR}
       OUTPUT_NAME "SDL2${OS2_RELEASE}"
       OS2_DEF_VENDOR "$ENV{VENDOR}"
       OS2_DEF_PATCH "${SDL_MICRO_VERSION}"
@@ -3370,9 +3388,6 @@ if(SDL_SHARED)
     if(WINDOWS OR CYGWIN)
       set_target_properties(SDL2 PROPERTIES
         DEFINE_SYMBOL DLL_EXPORT)
-    elseif(OS2)
-      set_target_properties(SDL2 PROPERTIES
-        DEFINE_SYMBOL BUILD_SDL)
     endif()
     set_target_properties(SDL2 PROPERTIES
       VERSION ${SDL_VERSION}
