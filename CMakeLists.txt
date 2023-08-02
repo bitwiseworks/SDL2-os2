@@ -118,7 +118,7 @@ set(LT_REVISION "${SDL_INTERFACE_AGE}")
 set(LT_RELEASE "2.0")
 set(LT_VERSION "${LT_MAJOR}.${LT_AGE}.${LT_REVISION}")
 if (OS2)
-  set(OS2_RELEASE "${SDL_MAJOR_VERSION}${SDL_MINOR_VERSION}")
+  set(OS2_RELEASE "${SDL_MAJOR_VERSION}00")
 endif()
 
 # The following should match the versions in the Xcode project file.
@@ -3360,8 +3360,6 @@ if(SDL_SHARED)
       OUTPUT_NAME "SDL2-${LT_RELEASE}")
   elseif(OS2)
     set_target_properties(SDL2 PROPERTIES
-      VERSION ${LT_VERSION}
-      SOVERSION ${LT_MAJOR}
       OUTPUT_NAME "SDL2${OS2_RELEASE}"
       OS2_DEF_VENDOR "$ENV{VENDOR}"
       OS2_DEF_PATCH "${SDL_MICRO_VERSION}"
