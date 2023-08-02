@@ -27,15 +27,15 @@
 #ifndef __LIBCN__
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
-#define debug_os2(s, ...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
+# define debug_os2(s,...) SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION,    \
                                  __func__ "(): " ##s,      ##__VA_ARGS__)
 #else
-#define debug_os2(s, ...) printf(__func__ "(): " ##s "\n", ##__VA_ARGS__)
+# define debug_os2(s,...) printf(__func__ "(): " ##s "\n", ##__VA_ARGS__)
 #endif
 
 #else /* no debug */
 
-#define debug_os2(s,...) do {} while (0)
+# define debug_os2(s,...) do {} while (0)
 
 #endif /* OS2DEBUG */
 
@@ -56,16 +56,16 @@ void SDL_OS2Quit(void);
 #else
 #ifdef OS2DEBUG
 #if (OS2DEBUG-0 >= 2)
-#define debug(category, s, ...) SDL_LogDebug( category, \
+# define debug(category, s,...) SDL_LogDebug( category, \
                                        "%s(): "s, __func__, ##__VA_ARGS__)
 #else
-#define debug(category, s, ...) printf("%s(): category: %i message: "s"\n", \
+# define debug(category, s,...) printf("%s(): category: %i message: "s"\n", \
                                         __func__, category, ##__VA_ARGS__)
 #endif
 
 #else /* no debug */
 
-#define debug(s, ...) do {} while (0)
+# define debug(s,...) do {} while (0)
 
 #endif /* OS2DEBUG */
 
