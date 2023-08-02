@@ -557,7 +557,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     pAData->cMixBuffers = stMCIBuffer.ulNumBuffers;
     _this->spec.size = stMCIBuffer.ulBufferSize;
 
-    debug(SDL_LOG_CATEGORY_AUDIO,"%s, number of mix buffers: %lu", _this->iscapture ? "capture": "play",pAData->cMixBuffers);
+    debug(SDL_LOG_CATEGORY_AUDIO,"%s, number of mix buffers: %lu", iscapture ? "capture": "play",pAData->cMixBuffers);
 
     /* Fill all device buffers with data */
     for (ulIdx = 0; ulIdx < stMCIBuffer.ulNumBuffers; ulIdx++) {
