@@ -454,7 +454,7 @@ static int OS2_OpenDevice(_THIS, const char *devname)
     }
     pAData->usDeviceId = stMCIAmpOpen.usDeviceID;
 
-    if (_this->iscapture) {
+    if (iscapture) {
         MCI_CONNECTOR_PARMS stMCIConnector;
         MCI_AMP_SET_PARMS   stMCIAmpSet;
         BOOL                fLineIn = _getEnvULong("SDL_AUDIO_LINEIN", 1, 0);
